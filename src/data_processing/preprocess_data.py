@@ -33,8 +33,8 @@ positions = preprocess_utils.read_bed(data_file)
 if not os.path.exists(os.path.join(output_directory,'chr_dict.pickle')):
     chr_dict = preprocess_utils.read_fasta(reference_genome, num_chr)
     pickle.dump(chr_dict, open(os.path.join(output_directory,'chr_dict.pickle'), "wb"))
-
-chr_dict = pickle.load(open(os.path.join(output_directory,'chr_dict.pickle'), "rb"))
+else:
+    chr_dict = pickle.load(open(os.path.join(output_directory,'chr_dict.pickle'), "rb"))
 
 one_hot_seqs, peak_seqs, invalid_ids, peak_names = preprocess_utils.get_sequences(positions, chr_dict, num_chr)
 
