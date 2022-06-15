@@ -1,8 +1,26 @@
 from Bio import SeqIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
 from collections import defaultdict
 import numpy as np
+
+# read names and postions from bed file
+def read_bed(filename):
+    positions = defaultdict(list)
+    with open(filename) as f:
+        for line in f:
+            chr, start, stop, name = line.split()
+            positions[name].append((chr, int(start), int(stop)))
+
+    return positions
+
+# parse fasta file and turn into dictionary
+def read_fasta(genome_dir, num_chr):
+    chr_dict = dict()
+    for chr in range(1, num_chr):
+        chr_file_path = genome_dir + "chr{}.fa".format(chr)
+        # in case memory becomes an issue, use Bio.SeqIO.index() instead
+        chr_dict.update(SeqIO.to_dict(SeqIO.parse(open(chr_file_path), 'fasta')))
+    
+    return chr_dict
 
 # takes DNA sequence, outputs one-hot-encoded matrix with rows A, T, G, C
 def one_hot_encoder(sequence):
@@ -19,30 +37,11 @@ def one_hot_encoder(sequence):
             x[3][j] = 1
         else:
             return "contains_N"
+    
     return x
 
-#read names and postions from bed file
-def read_bed(filename):
-    positions = defaultdict(list)
-    with open(filename) as f:
-        for line in f:
-            name, chr, start, stop = line.split()
-            positions[name].append((chr, int(start), int(stop)))
 
-    return positions
-
-
-# parse fasta file and turn into dictionary
-def read_fasta(genome_dir, num_chr):
-    chr_dict = dict()
-    for chr in range(1, num_chr):
-        chr_file_path = genome_dir + "chr{}.fa".format(chr)
-        chr_dict.update(SeqIO.to_dict(SeqIO.parse(open(chr_file_path), 'fasta')))
-
-    return chr_dict
-
-
-#get sequences for peaks from reference genome
+# get sequences for peaks from reference genome
 def get_sequences(positions, chr_dict, num_chr):
     one_hot_seqs = []
     peak_seqs = []
