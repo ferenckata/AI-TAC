@@ -36,25 +36,30 @@ if not os.path.exists(os.path.join(output_directory,'chr_dict.pickle')):
 else:
     chr_dict = pickle.load(open(os.path.join(output_directory,'chr_dict.pickle'), "rb"))
 
-one_hot_seqs, peak_seqs, invalid_ids, sequence_peak_names = preprocess_utils.get_sequences(positions, chr_dict, num_chr)
+one_hot_seqs, peak_seqs, invalid_ids, sequence_peak_names = preprocess_utils.get_sequences(positions, 
+                                                                                           chr_dict, 
+                                                                                           num_chr)
 
-# remove invalid ids from intensities file so sequence/intensity files match
-cell_type_array, intensity_peak_names = preprocess_utils.format_intensities(intensity_file, invalid_ids)
+# read in all intensity values and peak names
+cell_type_array, intensity_peak_names = preprocess_utils.format_intensities(intensity_file)
 cell_type_array = cell_type_array.astype(np.float32)
 
-# take one_hot_sequences of only peaks that have associated intensity values in cell_type_array
-# this makes unnecessary to filter for invalid peak ids
+# take one_hot encoding of valid sequences of only those peaks that 
+# have associated intensity values in cell_type_array
 valid_peak_ids = np.intersect1d(sequence_peak_names, intensity_peak_names)
 
-valid_seq_name_mask = np.isin(sequence_peak_names, valid_peak_ids)
-sequence_peak_names = sequence_peak_names[valid_seq_name_mask]
-one_hot_seqs = one_hot_seqs[valid_seq_name_mask, :, :]
-peak_seqs = peak_seqs[valid_seq_name_mask]
+sequence_peak_names, one_hot_seqs, peak_seqs = preprocess_utils.filter_matrix(sequence_peak_names,
+                                                                              valid_peak_ids,
+                                                                              one_hot_seqs,
+                                                                              peak_seqs
+                                                                              )
 
-valid_int_name_mask = np.isin(intensity_peak_names, valid_peak_ids)
-intensity_peak_names = intensity_peak_names[valid_int_name_mask]
-cell_type_array = cell_type_array[valid_int_name_mask, :]
+intensity_peak_names, cell_type_array = preprocess_utils.filter_matrix(intensity_peak_names,
+                                                                       valid_peak_ids,
+                                                                       cell_type_array
+                                                                       )
 
+# throw error here, add test for it
 if np.sum(sequence_peak_names != intensity_peak_names) > 0:
     print("Order of peaks not matching for sequences/intensities!")
 
@@ -67,12 +72,11 @@ with open(os.path.join(output_directory,'invalid_ids.txt'), 'w') as f:
     f.write(json.dumps(invalid_ids))
 f.close()
 
-#write fasta file
+# write fasta file
 with open(os.path.join(output_directory,'sequences.fasta'), 'w') as f:
     for i in range(peak_seqs.shape[0]):
         f.write('>' + sequence_peak_names[i] + '\n')
         f.write (peak_seqs[i] + '\n')
 f.close()
-
 
 np.save(os.path.join(output_directory,'cell_type_array.npy'), cell_type_array)

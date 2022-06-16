@@ -77,7 +77,7 @@ def get_sequences(positions, chr_dict, num_chr):
     return one_hot_seqs, peak_seqs, invalid_ids, peak_names
 
 
-def format_intensities(intensity_file, invalid_ids):
+def format_intensities(intensity_file):
     cell_type_array = []
     peak_names = []
     with open(intensity_file) as f:
@@ -89,17 +89,22 @@ def format_intensities(intensity_file, invalid_ids):
             peak_name = columns[0]
             # read lines until the EOF is read 
             if '\x1a' not in columns:
-                # check if the ID is valid
-                cell_id = columns[0]
-                if cell_id not in invalid_ids:
-                    cell_act = columns[1:] # removes peak ID
-                    cell_type_array.append(cell_act)
-                    peak_names.append(peak_name)
+                cell_act = columns[1:] # removes peak ID
+                cell_type_array.append(cell_act)
+                peak_names.append(peak_name)
 
     cell_type_array = np.stack(cell_type_array)
     peak_names = np.stack(peak_names)
 
     return cell_type_array, peak_names
 
+
+def filter_matrix(names, valid_ids, *argv):
+    valid_name_mask = np.isin(names, valid_ids)
+    return_values = []
+    return_values.append(names[valid_name_mask])
+    for arg in argv:
+        return_values.append(arg[valid_name_mask, ...])
+    return return_values
 
 
