@@ -36,30 +36,31 @@ if not os.path.exists(os.path.join(output_directory,'chr_dict.pickle')):
 else:
     chr_dict = pickle.load(open(os.path.join(output_directory,'chr_dict.pickle'), "rb"))
 
-one_hot_seqs, peak_seqs, invalid_ids, peak_names = preprocess_utils.get_sequences(positions, chr_dict, num_chr)
+one_hot_seqs, peak_seqs, invalid_ids, sequence_peak_names = preprocess_utils.get_sequences(positions, chr_dict, num_chr)
 
 # remove invalid ids from intensities file so sequence/intensity files match
-cell_type_array, peak_names2 = preprocess_utils.format_intensities(intensity_file, invalid_ids)
+cell_type_array, intensity_peak_names = preprocess_utils.format_intensities(intensity_file, invalid_ids)
 cell_type_array = cell_type_array.astype(np.float32)
 
-#take one_hot_sequences of only peaks that have associated intensity values in cell_type_array
-peak_ids = np.intersect1d(peak_names, peak_names2)
+# take one_hot_sequences of only peaks that have associated intensity values in cell_type_array
+# this makes unnecessary to filter for invalid peak ids
+valid_peak_ids = np.intersect1d(sequence_peak_names, intensity_peak_names)
 
-idx = np.isin(peak_names, peak_ids)
-peak_names = peak_names[idx]
-one_hot_seqs = one_hot_seqs[idx, :, :]
-peak_seqs = peak_seqs[idx]
+valid_seq_name_mask = np.isin(sequence_peak_names, valid_peak_ids)
+sequence_peak_names = sequence_peak_names[valid_seq_name_mask]
+one_hot_seqs = one_hot_seqs[valid_seq_name_mask, :, :]
+peak_seqs = peak_seqs[valid_seq_name_mask]
 
-idx2 = np.isin(peak_names2, peak_ids)
-peak_names2 = peak_names2[idx2]
-cell_type_array = cell_type_array[idx2, :]
+valid_int_name_mask = np.isin(intensity_peak_names, valid_peak_ids)
+intensity_peak_names = intensity_peak_names[valid_int_name_mask]
+cell_type_array = cell_type_array[valid_int_name_mask, :]
 
-if np.sum(peak_names != peak_names2) > 0:
+if np.sum(sequence_peak_names != intensity_peak_names) > 0:
     print("Order of peaks not matching for sequences/intensities!")
 
 # write to file
 np.save(os.path.join(output_directory,'one_hot_seqs.npy'), one_hot_seqs)
-np.save(os.path.join(output_directory,'peak_names.npy'), peak_names)
+np.save(os.path.join(output_directory,'peak_names.npy'), sequence_peak_names)
 np.save(os.path.join(output_directory,'peak_seqs.npy'), peak_seqs)
 
 with open(os.path.join(output_directory,'invalid_ids.txt'), 'w') as f:
@@ -69,7 +70,7 @@ f.close()
 #write fasta file
 with open(os.path.join(output_directory,'sequences.fasta'), 'w') as f:
     for i in range(peak_seqs.shape[0]):
-        f.write('>' + peak_names[i] + '\n')
+        f.write('>' + sequence_peak_names[i] + '\n')
         f.write (peak_seqs[i] + '\n')
 f.close()
 

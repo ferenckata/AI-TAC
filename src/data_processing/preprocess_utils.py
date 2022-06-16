@@ -60,17 +60,15 @@ def get_sequences(positions, chr_dict, num_chr):
                 peak_seq = str(chr_seq)[start - 1:stop].lower()
                 # already lowered the character, no need to check for uppercase letter in the encoding step
                 one_hot_seq = one_hot_encoder(peak_seq)
-
-                if isinstance(one_hot_seq, np.ndarray):  # it is valid sequence
+                # check if it is valid sequence
+                if isinstance(one_hot_seq, np.ndarray):  
                     peak_names.append(name)
                     peak_seqs.append(peak_seq)
                     one_hot_seqs.append(one_hot_seq)
                 else:
-                    # first 20 characters "ImmGenATAC1219.peak_" are skipped, only the peak number is kept
-                    # somewhat unnecessary it seems
-                    invalid_ids.append(name[20:]) 
+                    invalid_ids.append(name) 
             else:
-                invalid_ids.append(name[20:])
+                invalid_ids.append(name)
 
     one_hot_seqs = np.stack(one_hot_seqs)
     peak_seqs = np.stack(peak_seqs)
@@ -91,8 +89,8 @@ def format_intensities(intensity_file, invalid_ids):
             peak_name = columns[0]
             # read lines until the EOF is read 
             if '\x1a' not in columns:
-                # check if the ID is invalid
-                cell_id = columns[0][20:]
+                # check if the ID is valid
+                cell_id = columns[0]
                 if cell_id not in invalid_ids:
                     cell_act = columns[1:] # removes peak ID
                     cell_type_array.append(cell_act)
