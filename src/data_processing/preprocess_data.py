@@ -57,7 +57,8 @@ class Preprocessor():
         positions: dict
             Dictionary with keys: location IDs, and values: tuple of (chr, start, end)
         chr_dict: dict
-            Dictionary of genomic sequences (one entry per fasta entry (= chromosome))
+            Dictionary of genomic sequences in Bio.SeqRecord format
+            (one entry per fasta entry)
         """
         # read bed file with peak positions
         positions = ppu.PreprocessingMethods.read_bed(self.data_file)
@@ -82,7 +83,8 @@ class Preprocessor():
         positions: dict
             Dictionary with keys: location IDs, and values: tuple of (chr, start, end)
         chr_dict: dict
-            Dictionary of genomic sequences (one entry per fasta entry (= chromosome))
+            Dictionary of genomic sequences in Bio.SeqRecord format
+            (one entry per fasta entry)
             
         Return
         ------

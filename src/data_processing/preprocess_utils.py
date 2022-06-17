@@ -2,6 +2,7 @@
 Collection of used methods when preprocessing the data
 for subsequent deep learning application
 """
+import os
 from collections import defaultdict
 from Bio import SeqIO
 import numpy as np
@@ -35,7 +36,7 @@ class PreprocessingMethods():
     """
 
     @staticmethod
-    def read_bed(filename):
+    def read_bed(filename, region_size):
         """
         Read names and postions from bed file
 
@@ -44,6 +45,9 @@ class PreprocessingMethods():
         filename: str
             Path to the location of the input bed file with peak coordinates
             The bed file should have four columns in this order: chr, start, end, name
+        region_size: int
+            Size of bed regions, the bed file should have entries of the same size
+            region_size = (end - start)
         
         Return
         ------
@@ -51,37 +55,52 @@ class PreprocessingMethods():
             Dictionary with keys: location IDs, and values: tuple of (chr, start, end)
         """
         positions = defaultdict(list)
+        skipped_peaks = []
         with open(filename, encoding='utf8') as bed_file:
             for line in bed_file:
                 chromosome, start, stop, name = line.split()
-                positions[name].append((chromosome, int(start), int(stop)))
+                if (int(stop) - int(start)) == region_size:
+                    positions[name].append((chromosome, int(start), int(stop)))
+                else:
+                    skipped_peaks.append(name)
 
-        return positions
+        return positions, skipped_peaks
 
 
     @staticmethod
     def read_fasta(genome_dir, num_chr):
         """
-        Parse fasta file and turn into dictionary, save into file if not saved yet
+        Parse fasta files in a folder and turn content into a single dictionary
+        
+        Note
+        ----
+        Skips if file does not exist
 
         Parameters
         ----------
         genome_dir: str
             Path to the directory with reference genome fasta files
         num_chr: int
-            Number of chromosomes, this should match the name of the reference genome
+            Number of chromosomes = sum(autosomal + X + Y),
+            this should match the name of the reference genome
             fasta file names in the following manner: chr{num_chr}.fa
         Return
         ------
         chr_dict: dict
-            Dictionary of genomic sequences (one entry per fasta entry (= chromosome))
+            Dictionary of genomic sequences in Bio.SeqRecord format
+            (one entry per fasta entry)
         """
         chr_dict = {}
-        for chromosome in range(1, num_chr):
-            # what happens when the file does not exist?
-            chr_file_path = genome_dir + f'chr{chromosome}.fa'
-            # in case memory becomes an issue, use Bio.SeqIO.index() instead
-            chr_dict.update(SeqIO.to_dict(SeqIO.parse(chr_file_path, 'fasta')))
+        for chromosome in range(1, num_chr+3):
+            if chromosome == num_chr+1:
+                chromosome = "X"
+            elif chromosome == num_chr+2:
+                chromosome = "Y"
+            # skip if file does not exist
+            chr_file_path = os.path.join(genome_dir, f'chr{chromosome}.fa')
+            if os.path.exists(chr_file_path):
+                # in case memory becomes an issue, use Bio.SeqIO.index() instead
+                chr_dict.update(SeqIO.to_dict(SeqIO.parse(chr_file_path, 'fasta')))
 
         return chr_dict
 
@@ -166,7 +185,8 @@ class PreprocessingMethods():
         positions: dict
             Dictionary with keys: location IDs, and values: tuple of (chr, start, end)
         chr_dict: dict
-            Dictionary of genomic sequences (one entry per fasta entry (= chromosome))
+            Dictionary of genomic sequences in Bio.SeqRecord format
+            (one entry per fasta entry)
         num_chr: int
             Number of chromosomes, this should match the name of the reference genome
             fasta file names in the following manner: chr{num_chr}.fa
@@ -187,15 +207,15 @@ class PreprocessingMethods():
         invalid_ids = []
         peak_names = []
 
-        target_chr = [f'chr{i}' for i in range(1, num_chr)]
+        target_chr = [f'chr{i}' for i in range(1, num_chr+1)]
+        target_chr.append('chrX')
+        target_chr.append('chrY')
 
         for name in positions:
             for (chromosome, start, stop) in positions[name]:
-                # somewhat unnecessary here as it would probably throw an error
-                # when reading the file in
-                # todo: check it once above
                 if chromosome in target_chr:
                     chr_seq = chr_dict[chromosome].seq
+                    # assuming input as 1-based but output as 0 based, last value not included?
                     peak_seq = str(chr_seq)[start - 1:stop].lower()
                     # already lowered the character, no need to check for uppercase
                     # letter in the encoding step
