@@ -13,7 +13,8 @@ class TestPreprocessingMethods(unittest.TestCase):
 
     def test_bedfile_reader_standard_file(self):
         """
-        Test code to read in bedfile with chr, start, stop, name entries separated by tab (equal entry length)
+        Test code to read in bedfile with chr, start, stop, name entries separated by tab 
+        (equal entry length)
         """
         test_bed = "test/correct_bed_testfile.bed"
         region_size = 250
@@ -74,7 +75,7 @@ class TestPreprocessingMethods(unittest.TestCase):
             Seq("AGATAGTAGAAATGGCGCGC"),
             id="test7",name="test7",
             description="test7",)
-        record_testX = SeqRecord(
+        record_testx = SeqRecord(
             Seq("agatgctgctgatcgatcgatgctaggatcga"),
             id="testX",name="testX",
             description="testX",)
@@ -85,18 +86,11 @@ class TestPreprocessingMethods(unittest.TestCase):
                            "test5":record_test5,
                            "test6":record_test6,
                            "test7":record_test7,
-                           "testX":record_testX}
+                           "testX":record_testx}
         actual_output = pp.PreprocessingMethods.read_fasta(test_fasta_dir, test_chr_num)
         self.assertEqual([rec.seq for rec in actual_output.values()],
                         [rec.seq for rec in expected_output.values()])
         self.assertEqual(list(actual_output), list(expected_output))
-
-
-    def test_fastafile_reader_xy_chr(self):
-        """
-        Test code to read in fasta files including X and Y chromosomes from directory
-        """
-        # ToDo
 
 
     def test_intensityfile_reader_standard_file(self):
@@ -145,7 +139,7 @@ class TestPreprocessingMethods(unittest.TestCase):
         actual_encoding = pp.PreprocessingMethods.one_hot_encoder(test_string)
         self.assertEqual(actual_encoding, expected_encoding)
 
-    
+
     def test_get_sequences(self):
         """
         Test the method which loops through the sequences and encodes them
@@ -154,7 +148,7 @@ class TestPreprocessingMethods(unittest.TestCase):
         test_positions["peak_1"].append(("chr1",1,5))
         test_positions["peak_2"].append(("chr2",6,10))
         test_positions["peak_3"].append(("chr2",23,27))
-        
+
         record_test1 = SeqRecord(
             Seq("AGNTGATAGATAGAGTGTATGTA"),
             id="chr1",name="chr1",
@@ -179,10 +173,79 @@ class TestPreprocessingMethods(unittest.TestCase):
         expected_ps = np.stack(["GTAGA".lower(), "GCGCG".lower()])
         expected_pn = np.stack(["peak_2","peak_3"])
         ecpected_ii = ["peak_1"]
-        actual_ohs, actual_ps, actual_pn, actual_ii = pp.PreprocessingMethods.get_sequences(test_positions, test_chr_seq, test_num_chr)
+        actual_ohs, actual_ps, actual_pn, actual_ii = pp.PreprocessingMethods.get_sequences(test_positions,
+                                                                                    test_chr_seq,
+                                                                                    test_num_chr)
         np.testing.assert_array_equal(actual_ohs, expected_ohs)
         np.testing.assert_array_equal(actual_ps, expected_ps)
         np.testing.assert_array_equal(actual_pn, expected_pn)
         self.assertEqual(actual_ii, ecpected_ii)
 
 
+    def test_filter_matrix_one_1d_input(self):
+        """
+        Test the auxiliary method to filter out invalid entries from different data types
+        """
+        test_names = np.stack(["peak_2","peak_3"])
+        test_valid_ids = np.array(["peak_1", "peak_2"])
+        expected_filtered_values = np.array([["peak_2"]])
+        actual_filtered_values = pp.PreprocessingMethods.filter_matrix(test_names, test_valid_ids)
+        np.testing.assert_array_equal(actual_filtered_values, expected_filtered_values)
+
+
+    def test_filter_matrix_two_1d_inputs(self):
+        """
+        Test the auxiliary method to filter out invalid entries from different data types
+        """
+        test_names = np.stack(["peak_2","peak_3"])
+        test_valid_ids = np.array(["peak_1", "peak_2"])
+        test_peak_seqs = np.stack(["GTAGA".lower(), "GCGCG".lower()])
+        expected_names = np.array(["peak_2"])
+        expected_peak_seqs = np.stack(["GTAGA".lower()])
+        actual_filtered_values = pp.PreprocessingMethods.filter_matrix(test_names, test_valid_ids, test_peak_seqs)
+        np.testing.assert_array_equal(actual_filtered_values[0], expected_names)
+        np.testing.assert_array_equal(actual_filtered_values[1], expected_peak_seqs)
+
+
+    def test_filter_matrix_1d_2d_and_3d_inputs(self):
+        """
+        Test the auxiliary method to filter out invalid entries from different data types
+        """
+
+        test_valid_ids = np.array(["peak_1", "peak_2"])
+        test_1d = np.stack(["peak_1", "peak_2","peak_3"])
+        test_2d = np.stack([['0.41', '0.71', '0.9','0.11'],
+                                         ['0.41', '1.64', '0.9', '0.83'],
+                                         ['2.36', '0.1', '0.9', '0.11']])
+        test_3d = np.stack((np.array([0,0,1,0,1,
+                                       0,1,0,0,0,
+                                       1,0,0,1,0,
+                                       0,0,0,0,0], dtype = 'int8').reshape(4,5),
+                             np.array([0,0,0,0,0,
+                                       0,0,0,0,0,
+                                       1,0,1,0,1,
+                                       0,1,0,1,0], dtype = 'int8').reshape(4,5),
+                             np.array([1,1,1,0,0,
+                                       0,0,0,0,0,
+                                       0,0,0,0,1,
+                                       0,0,0,1,0], dtype = 'int8').reshape(4,5)
+                            ))
+        expected_1d = np.array(["peak_1", "peak_2"])
+        expected_2d = np.stack([['0.41', '0.71', '0.9','0.11'],
+                                ['0.41', '1.64', '0.9', '0.83']])
+        expected_3d = np.stack((np.array([0,0,1,0,1, 
+                                           0,1,0,0,0,
+                                           1,0,0,1,0,
+                                           0,0,0,0,0], dtype = 'int8').reshape(4,5),
+                                 np.array([0,0,0,0,0,
+                                           0,0,0,0,0,
+                                           1,0,1,0,1,
+                                           0,1,0,1,0], dtype = 'int8').reshape(4,5)
+                                ))
+        actual_filtered_values = pp.PreprocessingMethods.filter_matrix(test_1d,
+                                                                       test_valid_ids,
+                                                                       test_2d,
+                                                                       test_3d)
+        np.testing.assert_array_equal(actual_filtered_values[0], expected_1d)
+        np.testing.assert_array_equal(actual_filtered_values[1], expected_2d)
+        np.testing.assert_array_equal(actual_filtered_values[2], expected_3d)

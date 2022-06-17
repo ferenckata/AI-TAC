@@ -48,7 +48,7 @@ class PreprocessingMethods():
         region_size: int
             Size of bed regions, the bed file should have entries of the same size
             region_size = (end - start)
-        
+
         Return
         ------
         positions: dict
@@ -71,7 +71,7 @@ class PreprocessingMethods():
     def read_fasta(genome_dir, num_chr):
         """
         Parse fasta files in a folder and turn content into a single dictionary
-        
+
         Note
         ----
         Skips if file does not exist
@@ -261,5 +261,5 @@ class PreprocessingMethods():
         return_values.append(names[valid_name_mask])
         for arg in argv:
             return_values.append(arg[valid_name_mask, ...])
-  
+
         return return_values
