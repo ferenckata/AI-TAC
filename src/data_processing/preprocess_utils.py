@@ -81,7 +81,7 @@ class PreprocessingMethods():
         genome_dir: str
             Path to the directory with reference genome fasta files
         num_chr: int
-            Number of chromosomes = sum(autosomal + X + Y),
+            Number of autosomal chromosomes (X and Y will be searched for and used if available),
             this should match the name of the reference genome
             fasta file names in the following manner: chr{num_chr}.fa
         Return
@@ -189,7 +189,8 @@ class PreprocessingMethods():
             Dictionary of genomic sequences in Bio.SeqRecord format
             (one entry per fasta entry)
         num_chr: int
-            Number of chromosomes, this should match the name of the reference genome
+            Number of autosomal chromosomes (X and Y will be searched for and used if available),
+            this should match the name of the reference genome
             fasta file names in the following manner: chr{num_chr}.fa
 
         Return

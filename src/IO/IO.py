@@ -3,12 +3,56 @@
 import os
 import json
 import _pickle as pickle
+import yaml
 import numpy as np
 
 class IO():
     """
     Class with input/output responsibilities
     """
+
+    def __init__(self, config_file) -> None:
+        """
+        Constructor for internalizing config file
+
+        Parameters
+        ----------
+        config_file: str
+            Path to config
+        """
+        self.config = self.load_config_file(config_file)
+
+
+    def load_config_file(self, config_file):
+        """
+        Constructor for internalizing config file
+
+        Parameters
+        ----------
+        config_file: str
+            Path to config
+        
+        Return
+        ------
+        config: dict
+            Dictionary of config entries
+        """
+        with open(config_file, "r", encoding='utf8') as file:
+            config = yaml.safe_load(file)
+        return config
+    
+
+    def get_config_entry(self, config_entry):
+        """
+        Getter for a config entry
+
+        Return
+        ------
+        _ :str
+            Config entry
+        """
+        return(self.config[config_entry])
+
 
     @staticmethod
     def create_directory_if_not_exists(directory_path):
