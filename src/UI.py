@@ -29,10 +29,3 @@ class UserInterface():
         my_io.log_to_file("saved to file")
         my_io.log_to_file("done")
 
-    
-def main():
-    ui = UserInterface()
-    ui.run_preprocessing()
-
-if __name__ == "__main__":
-    main()
