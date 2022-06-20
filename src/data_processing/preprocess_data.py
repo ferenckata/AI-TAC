@@ -64,7 +64,7 @@ class Preprocessor():
             (one entry per fasta entry)
         """
         # read bed file with peak positions
-        positions = PM.read_bed(self.data_file, self.region_size)
+        positions, skipped_peaks = PM.read_bed(self.data_file, self.region_size)
         # read reference genome fasta file into dictionary
         if not my_io.is_file_exists(self.output_directory,'chr_dict.pickle'):
             chr_dict = PM.read_fasta(self.reference_genome_dir, self.num_chr)
@@ -72,7 +72,7 @@ class Preprocessor():
         else:
             chr_dict = my_io.read_pickle(self.output_directory, 'chr_dict')
 
-        return positions, chr_dict
+        return positions, chr_dict, skipped_peaks
 
 
     def reformat_data(self, positions, chr_dict):
@@ -130,7 +130,7 @@ class Preprocessor():
         return valid_peak_ids, one_hot_seqs, peak_seqs, cell_type_array, invalid_ids
 
 
-    def save_data_to_file(self, valid_peak_ids, one_hot_seqs, peak_seqs, cell_type_array, invalid_ids):
+    def save_data_to_file(self, valid_peak_ids, one_hot_seqs, peak_seqs, cell_type_array, invalid_ids, skipped_peaks):
         """
         Function to save all the data created in this process
 
@@ -155,6 +155,7 @@ class Preprocessor():
 
         # save position names of invalid sequences
         my_io.save_data_in_json(invalid_ids, self.output_directory, 'invalid_ids')
+        my_io.save_data_in_json(skipped_peaks, self.output_directory, 'peaks_of_invalid_length')
 
         # write peak sequences to fasta file
         out_seq_filename = 'peak_sequences'

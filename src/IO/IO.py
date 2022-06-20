@@ -53,6 +53,14 @@ class IO():
         """
         return(self.config[config_entry])
 
+    
+    def log_to_file(self, message):
+        """
+        Log message
+        """
+        with open(self.config["log"], "a") as log_file:
+            log_file.write(message + "\n")
+
 
     @staticmethod
     def create_directory_if_not_exists(directory_path):

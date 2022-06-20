@@ -1,12 +1,15 @@
 # bed file of peak coordinates - first 200
 data_file: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/sample_data/ImmGenATAC/ImmGenATAC18_AllOCR.200.bed
+# region_size = (end - start) in bed file, the bed file should have entries of the same size
+region_size: 250
 # tsv file of peak intensity values - first 200
 intensity_file: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/sample_data/ImmGenATAC/ImmGenATAC18_AllOCR_Intensity.200.tsv
 # path to reference genome
 reference_genome_dir: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/sample_data/ImmGenATAC/mm10/
-# name for output folder
-output_directory: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/mouse_immune_data/
 # number of chromsomes in the reference genome not including X and Y
 num_chr: 19
-# region_size = (end - start) in bed file, the bed file should have entries of the same size
-region_size: 250
+# name for output folder
+output_directory: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/mouse_immune_data/
+# log file
+log: log.txt
+
