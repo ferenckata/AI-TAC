@@ -1,8 +1,6 @@
 """ This module is for preprocessing input files for subsequent deep learning applications """
 
-import os
 import numpy as np
-import _pickle as pickle
 import data_processing.preprocess_utils as ppu
 import IO.IO as my_io
 
@@ -14,14 +12,14 @@ class Preprocessor():
 
     Attributes
     ----------
- 
+
     Methods
     -------
 
 
     """
 
-    def __init__(self, data_file, intensity_file, reference_genome_dir, data_type, num_chr):
+    def __init__(self, data_file, intensity_file, reference_genome_dir, data_type, num_chr, region_size):
         """
         Constructor
 
@@ -39,12 +37,16 @@ class Preprocessor():
         num_chr: int
             Number of chromosomes, this should match the name of the reference genome
             fasta file names in the following manner: chr{num_chr}.fa
+        region_size: int
+            Size of bed regions, the bed file should have entries of the same size
+            region_size = (end - start)
         """
         self.data_file = data_file
         self.intensity_file = intensity_file
         self.reference_genome_dir = reference_genome_dir
         self.output_directory = "../" + data_type.replace(" ","_") + "_data/"
         self.num_chr = num_chr
+        self.region_size = region_size
         my_io.IO.create_directory_if_not_exists(self.output_directory)
 
 
@@ -61,16 +63,14 @@ class Preprocessor():
             (one entry per fasta entry)
         """
         # read bed file with peak positions
-        positions = ppu.PreprocessingMethods.read_bed(self.data_file)
+        positions = ppu.PreprocessingMethods.read_bed(self.data_file, self.region_size)
         # read reference genome fasta file into dictionary
-        if not os.path.exists(os.path.join(self.output_directory,'chr_dict.pickle')):
+        if not my_io.IO.is_file_exists(self.output_directory,'chr_dict.pickle'):
             chr_dict = ppu.PreprocessingMethods.read_fasta(self.reference_genome_dir, self.num_chr)
-            # move to IO
-            pickle.dump(chr_dict, open(os.path.join(self.output_directory,'chr_dict.pickle'), "wb"))
+            my_io.IO.save_data_in_pickle(chr_dict, self.output_directory, 'chr_dict')
         else:
-            # move to IO
-            chr_dict = pickle.load(open(os.path.join(self.output_directory,'chr_dict.pickle'), "rb"))
-        
+            chr_dict = my_io.IO.read_pickle(self.output_directory, 'chr_dict')
+
         return positions, chr_dict
 
 
@@ -105,7 +105,6 @@ class Preprocessor():
         
         # read in all intensity values and peak names
         cell_type_array, intensity_peak_names = ppu.PreprocessingMethods.read_intensities(self.intensity_file)
-        cell_type_array = cell_type_array.astype(np.float32)
 
         # take one_hot encoding of valid sequences of only those peaks that
         # have associated intensity values in cell_type_array
@@ -154,12 +153,8 @@ class Preprocessor():
         my_io.IO.numpy_save(cell_type_array, self.output_directory, 'cell_type_array')
 
         # save position names of invalid sequences
-        my_io.IO.json_dump(invalid_ids, self.output_directory, 'invalid_ids.txt')
+        my_io.IO.save_data_in_json(invalid_ids, self.output_directory, 'invalid_ids.txt')
 
         # write peak sequences to fasta file
         out_seq_filename = 'peak_sequences'
-        out_seq_file = os.path.join(self.output_directory, out_seq_filename)
-        with open(out_seq_file, 'w', encoding='utf8') as peak_seq_file:
-            for i in range(peak_seqs.shape[0]):
-                peak_seq_file.write('>' + valid_peak_ids[i] + '\n')
-                peak_seq_file.write (peak_seqs[i] + '\n')
+        my_io.IO.write_seq_to_fasta(peak_seqs, valid_peak_ids, self.output_directory, out_seq_filename)

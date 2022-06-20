@@ -102,6 +102,7 @@ class TestPreprocessingMethods(unittest.TestCase):
                                             ['0.41', '1.64', '0.9', '0.83'],
                                             ['2.36', '0.1', '0.9', '0.11']])
         expected_peak_names = np.stack(["peak_1", "peak_2", "peak_3"])
+        expected_cell_type_array = expected_cell_type_array.astype(np.float32)
         actual_cell_type_array, actual_peak_names = pp.PreprocessingMethods.read_intensities(test_tsv)
         np.testing.assert_array_equal(actual_cell_type_array, expected_cell_type_array)
         np.testing.assert_array_equal(actual_peak_names, expected_peak_names)
@@ -217,6 +218,7 @@ class TestPreprocessingMethods(unittest.TestCase):
         test_2d = np.stack([['0.41', '0.71', '0.9','0.11'],
                                          ['0.41', '1.64', '0.9', '0.83'],
                                          ['2.36', '0.1', '0.9', '0.11']])
+        test_2d = test_2d.astype(np.float32)
         test_3d = np.stack((np.array([0,0,1,0,1,
                                        0,1,0,0,0,
                                        1,0,0,1,0,
@@ -233,7 +235,8 @@ class TestPreprocessingMethods(unittest.TestCase):
         expected_1d = np.array(["peak_1", "peak_2"])
         expected_2d = np.stack([['0.41', '0.71', '0.9','0.11'],
                                 ['0.41', '1.64', '0.9', '0.83']])
-        expected_3d = np.stack((np.array([0,0,1,0,1, 
+        expected_2d = expected_2d.astype(np.float32)
+        expected_3d = np.stack((np.array([0,0,1,0,1,
                                            0,1,0,0,0,
                                            1,0,0,1,0,
                                            0,0,0,0,0], dtype = 'int8').reshape(4,5),

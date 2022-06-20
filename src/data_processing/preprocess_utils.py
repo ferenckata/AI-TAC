@@ -20,7 +20,7 @@ class PreprocessingMethods():
 
     read_fasta(genome_dir, num_chr):
         Parse fasta file and turn into dictionary, save into file if not saved yet
-    
+
     read_intensities(intensity_file):
         Read in peak values from tab delimited file
 
@@ -29,7 +29,7 @@ class PreprocessingMethods():
 
     get_sequences(positions, chr_dict, num_chr):
         Get sequences for peaks from the reference genome
-    
+
     filter_matrix(names, valid_ids, *argv):
         Filter out invalid entries from each data matrix
 
@@ -138,6 +138,7 @@ class PreprocessingMethods():
                     peak_names.append(peak_name)
 
         cell_type_array = np.stack(cell_type_array)
+        cell_type_array = cell_type_array.astype(np.float32)
         peak_names = np.stack(peak_names)
 
         return cell_type_array, peak_names
