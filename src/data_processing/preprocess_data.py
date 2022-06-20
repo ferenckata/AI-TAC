@@ -19,7 +19,7 @@ class Preprocessor():
 
     """
 
-    def __init__(self, data_file, intensity_file, reference_genome_dir, data_type, num_chr, region_size):
+    def __init__(self, data_file, intensity_file, reference_genome_dir, output_directory, num_chr, region_size):
         """
         Constructor
 
@@ -32,8 +32,8 @@ class Preprocessor():
             Path to the tab (or whitespace) deliminated text file with normalized peak heights
         reference_genome_dir: str
             Path to the directory with reference genome fasta files
-        data_type: str
-            Type of input data, such as "human_blood" or "lizard_kidney"
+        output_directory: str
+            Path to output folder where all intermediate files will be saved
         num_chr: int
             Number of autosomal chromosomes (X and Y will be searched for and used if available),
             this should match the name of the reference genome
@@ -45,7 +45,7 @@ class Preprocessor():
         self.data_file = data_file
         self.intensity_file = intensity_file
         self.reference_genome_dir = reference_genome_dir
-        self.output_directory = "../" + data_type.replace(" ","_") + "_data/"
+        self.output_directory = output_directory
         self.num_chr = num_chr
         self.region_size = region_size
         my_io.create_directory_if_not_exists(self.output_directory)

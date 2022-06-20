@@ -5,7 +5,7 @@ intensity_file: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthon
 # path to reference genome
 reference_genome_dir: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/sample_data/ImmGenATAC/mm10/
 # name for output folder
-data_type: mouse_immune
+output_directory: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/mouse_immune_data/
 # number of chromsomes in the reference genome not including X and Y
 num_chr: 19
 # region_size = (end - start) in bed file, the bed file should have entries of the same size

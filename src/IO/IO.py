@@ -40,7 +40,7 @@ class IO():
         with open(config_file, "r", encoding='utf8') as file:
             config = yaml.safe_load(file)
         return config
-    
+
 
     def get_config_entry(self, config_entry):
         """
