@@ -1,8 +1,11 @@
 # bed file of peak coordinates - first 200
+# The name column should have only one underscore (_) before the peak number
+# For example: peak_1, myprettybedfilespeak_1
 data_file: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/sample_data/ImmGenATAC/ImmGenATAC18_AllOCR.200.bed
 # region_size = (end - start) in bed file, the bed file should have entries of the same size
 region_size: 250
 # tsv file of peak intensity values - first 200
+# the peak names must match the names in the bed files
 intensity_file: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/sample_data/ImmGenATAC/ImmGenATAC18_AllOCR_Intensity.200.tsv
 # path to reference genome
 reference_genome_dir: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/sample_data/ImmGenATAC/mm10/

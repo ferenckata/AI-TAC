@@ -76,6 +76,7 @@ class IO():
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+
     @staticmethod
     def is_file_exists(directory, filename):
         """
@@ -94,6 +95,14 @@ class IO():
             True if exists, False if not
         """
         return bool(os.path.exists(os.path.join(directory, filename)))
+
+
+    @staticmethod
+    def join_path(directory, filename):
+        """
+        Wrapper around os.path.join
+        """
+        return(os.path.join(directory, filename))
 
 
     @staticmethod
@@ -166,7 +175,7 @@ class IO():
         filename = os.path.join(output_directory, filename + '.fasta')
         with open(filename, 'w', encoding='utf8') as peak_seq_file:
             for i in range(sequences.shape[0]):
-                peak_seq_file.write('>' + sequence_names[i] + '\n')
+                peak_seq_file.write('>peak_' + str(sequence_names[i]) + '\n')
                 peak_seq_file.write(sequences[i] + '\n')
 
 

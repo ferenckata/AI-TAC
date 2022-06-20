@@ -19,9 +19,9 @@ class TestPreprocessingMethods(unittest.TestCase):
         test_bed = "test/correct_bed_testfile.bed"
         region_size = 250
         expected_output = defaultdict(list)
-        expected_output["peak_1"].append(("chr1",50,300))
-        expected_output["peak_2"].append(("chr2",200,450))
-        expected_output["peak_3"].append(("chr3",150,400))
+        expected_output[1].append(("chr1",50,300))
+        expected_output[2].append(("chr2",200,450))
+        expected_output[3].append(("chr3",150,400))
         expected_skipped = []
         actual_output, actual_skipped = pp.PreprocessingMethods.read_bed(test_bed, region_size)
         self.assertEqual(actual_output, expected_output)
@@ -35,7 +35,7 @@ class TestPreprocessingMethods(unittest.TestCase):
         test_bed = "test/incorrect_bed_testfile.bed"
         region_size = 250
         expected_positions = defaultdict(list)
-        expected_skipped = ["peak_1", "peak_2", "peak_3"]
+        expected_skipped = [1, 2, 3]
         actual_positions, actual_skipped = pp.PreprocessingMethods.read_bed(test_bed, region_size)
         self.assertEqual(actual_positions, expected_positions)
         self.assertEqual(actual_skipped, expected_skipped)
@@ -101,7 +101,7 @@ class TestPreprocessingMethods(unittest.TestCase):
         expected_cell_type_array = np.stack([['0.41', '0.71', '0.9','0.11'],
                                             ['0.41', '1.64', '0.9', '0.83'],
                                             ['2.36', '0.1', '0.9', '0.11']])
-        expected_peak_names = np.stack(["peak_1", "peak_2", "peak_3"])
+        expected_peak_names = np.stack([1, 2, 3])
         expected_cell_type_array = expected_cell_type_array.astype(np.float32)
         actual_cell_type_array, actual_peak_names = pp.PreprocessingMethods.read_intensities(test_tsv)
         np.testing.assert_array_equal(actual_cell_type_array, expected_cell_type_array)
@@ -146,9 +146,9 @@ class TestPreprocessingMethods(unittest.TestCase):
         Test the method which loops through the sequences and encodes them
         """
         test_positions = defaultdict(list)
-        test_positions["peak_1"].append(("chr1",1,5))
-        test_positions["peak_2"].append(("chr2",6,10))
-        test_positions["peak_3"].append(("chr2",23,27))
+        test_positions[1].append(("chr1",1,5))
+        test_positions[2].append(("chr2",6,10))
+        test_positions[3].append(("chr2",23,27))
 
         record_test1 = SeqRecord(
             Seq("AGNTGATAGATAGAGTGTATGTA"),
@@ -172,8 +172,8 @@ class TestPreprocessingMethods(unittest.TestCase):
                                           0,1,0,1,0], dtype = 'int8').reshape(4,5)
                                 ))
         expected_ps = np.stack(["GTAGA".lower(), "GCGCG".lower()])
-        expected_pn = np.stack(["peak_2","peak_3"])
-        ecpected_ii = ["peak_1"]
+        expected_pn = np.stack([2, 3])
+        ecpected_ii = [1]
         actual_ohs, actual_ps, actual_pn, actual_ii = pp.PreprocessingMethods.get_sequences(test_positions,
                                                                                     test_chr_seq,
                                                                                     test_num_chr)
@@ -187,9 +187,9 @@ class TestPreprocessingMethods(unittest.TestCase):
         """
         Test the auxiliary method to filter out invalid entries from different data types
         """
-        test_names = np.stack(["peak_2","peak_3"])
-        test_valid_ids = np.array(["peak_1", "peak_2"])
-        expected_filtered_values = np.array([["peak_2"]])
+        test_names = np.stack([2, 3])
+        test_valid_ids = np.array([1, 2])
+        expected_filtered_values = np.array([[2]])
         actual_filtered_values = pp.PreprocessingMethods.filter_matrix(test_names, test_valid_ids)
         np.testing.assert_array_equal(actual_filtered_values, expected_filtered_values)
 
@@ -198,10 +198,10 @@ class TestPreprocessingMethods(unittest.TestCase):
         """
         Test the auxiliary method to filter out invalid entries from different data types
         """
-        test_names = np.stack(["peak_2","peak_3"])
-        test_valid_ids = np.array(["peak_1", "peak_2"])
+        test_names = np.stack([2, 3])
+        test_valid_ids = np.array([1, 2])
         test_peak_seqs = np.stack(["GTAGA".lower(), "GCGCG".lower()])
-        expected_names = np.array(["peak_2"])
+        expected_names = np.array([2])
         expected_peak_seqs = np.stack(["GTAGA".lower()])
         actual_filtered_values = pp.PreprocessingMethods.filter_matrix(test_names, test_valid_ids, test_peak_seqs)
         np.testing.assert_array_equal(actual_filtered_values[0], expected_names)
@@ -213,8 +213,8 @@ class TestPreprocessingMethods(unittest.TestCase):
         Test the auxiliary method to filter out invalid entries from different data types
         """
 
-        test_valid_ids = np.array(["peak_1", "peak_2"])
-        test_1d = np.stack(["peak_1", "peak_2","peak_3"])
+        test_valid_ids = np.array([1, 2])
+        test_1d = np.stack([1, 2, 3])
         test_2d = np.stack([['0.41', '0.71', '0.9','0.11'],
                                          ['0.41', '1.64', '0.9', '0.83'],
                                          ['2.36', '0.1', '0.9', '0.11']])
@@ -232,7 +232,7 @@ class TestPreprocessingMethods(unittest.TestCase):
                                        0,0,0,0,1,
                                        0,0,0,1,0], dtype = 'int8').reshape(4,5)
                             ))
-        expected_1d = np.array(["peak_1", "peak_2"])
+        expected_1d = np.array([1, 2])
         expected_2d = np.stack([['0.41', '0.71', '0.9','0.11'],
                                 ['0.41', '1.64', '0.9', '0.83']])
         expected_2d = expected_2d.astype(np.float32)

@@ -2,10 +2,10 @@
 Collection of used methods when preprocessing the data
 for subsequent deep learning application
 """
-import os
 from collections import defaultdict
 from Bio import SeqIO
 import numpy as np
+from src.IO.IO import IO as my_io
 
 class PreprocessingMethods():
     """
@@ -35,6 +35,7 @@ class PreprocessingMethods():
 
     """
 
+
     @staticmethod
     def read_bed(filename, region_size):
         """
@@ -45,6 +46,8 @@ class PreprocessingMethods():
         filename: str
             Path to the location of the input bed file with peak coordinates
             The bed file should have four columns in this order: chr, start, end, name
+            The name column should have only one underscore (_) before the peak number
+            For example: peak_1, myprettybedfilespeak_1
         region_size: int
             Size of bed regions, the bed file should have entries of the same size
             region_size = (end - start)
@@ -59,6 +62,7 @@ class PreprocessingMethods():
         with open(filename, encoding='utf8') as bed_file:
             for line in bed_file:
                 chromosome, start, stop, name = line.split()
+                name = int(name.split("_")[1])
                 if (int(stop) - int(start)) == region_size:
                     positions[name].append((chromosome, int(start), int(stop)))
                 else:
@@ -97,10 +101,10 @@ class PreprocessingMethods():
             elif chromosome == num_chr+2:
                 chromosome = "Y"
             # skip if file does not exist
-            chr_file_path = os.path.join(genome_dir, f'chr{chromosome}.fa')
-            if os.path.exists(chr_file_path):
+            if my_io.is_file_exists(genome_dir, f'chr{chromosome}.fa'):
                 # in case memory becomes an issue, use Bio.SeqIO.index() instead
-                chr_dict.update(SeqIO.to_dict(SeqIO.parse(chr_file_path, 'fasta')))
+                genome_file_path = my_io.join_path(genome_dir, f'chr{chromosome}.fa')
+                chr_dict.update(SeqIO.to_dict(SeqIO.parse(genome_file_path, 'fasta')))
 
         return chr_dict
 
@@ -130,7 +134,7 @@ class PreprocessingMethods():
                 if i == 0:
                     continue
                 columns = line.split()
-                peak_name = columns[0]
+                peak_name = int(columns[0].split("_")[1])
                 # read lines until the EOF is read
                 if '\x1a' not in columns:
                     cell_act = columns[1:] # removes peak ID

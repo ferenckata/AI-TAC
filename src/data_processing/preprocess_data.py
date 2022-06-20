@@ -28,6 +28,8 @@ class Preprocessor():
         data_file: str
             Path to the location of the input bed file with peak coordinates
             The bed file should have four columns in this order: chr, start, end, name
+            The name column should have only one underscore (_) before the peak number
+            For example: peak_1, myprettybedfilespeak_1
         intensity_file: str
             Path to the tab (or whitespace) deliminated text file with normalized peak heights
         reference_genome_dir: str
@@ -125,6 +127,8 @@ class Preprocessor():
         if np.sum(sequence_peak_names != intensity_peak_names) > 0:
             raise AssertionError("Order of peaks not matching for sequences/intensities!")
         if np.sum(sequence_peak_names != valid_peak_ids) > 0:
+            print(sequence_peak_names[0:10])
+            print(valid_peak_ids[0:10])
             raise AssertionError("Order of peaks not matching for sequences/valid positions!")
 
         return valid_peak_ids, one_hot_seqs, peak_seqs, cell_type_array, invalid_ids
