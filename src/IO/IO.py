@@ -58,7 +58,7 @@ class IO():
         filename: str
             Output filename
         """
-        with open(os.path.join(output_directory,filename), 'w', encoding='utf8') as json_file:
+        with open(os.path.join(output_directory,filename+'.json'), 'w', encoding='utf8') as json_file:
             json_file.write(json.dumps(data_out))
 
 

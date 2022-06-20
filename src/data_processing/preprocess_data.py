@@ -153,7 +153,7 @@ class Preprocessor():
         my_io.IO.numpy_save(cell_type_array, self.output_directory, 'cell_type_array')
 
         # save position names of invalid sequences
-        my_io.IO.save_data_in_json(invalid_ids, self.output_directory, 'invalid_ids.txt')
+        my_io.IO.save_data_in_json(invalid_ids, self.output_directory, 'invalid_ids')
 
         # write peak sequences to fasta file
         out_seq_filename = 'peak_sequences'
