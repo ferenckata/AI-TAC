@@ -25,13 +25,13 @@ class IO():
 
     def load_config_file(self, config_file):
         """
-        Constructor for internalizing config file
+        Readin in config file
 
         Parameters
         ----------
         config_file: str
             Path to config
-        
+
         Return
         ------
         config: dict
@@ -51,9 +51,9 @@ class IO():
         _ :str
             Config entry
         """
-        return(self.config[config_entry])
+        return self.config[config_entry]
 
-    
+
     def log_to_file(self, message):
         """
         Log message
@@ -102,7 +102,7 @@ class IO():
         """
         Wrapper around os.path.join
         """
-        return(os.path.join(directory, filename))
+        return os.path.join(directory, filename)
 
 
     @staticmethod
