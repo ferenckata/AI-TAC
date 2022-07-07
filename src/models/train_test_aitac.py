@@ -6,6 +6,8 @@ import matplotlib
 import os
 import sys
 import pathlib
+
+from models import model_utils
 matplotlib.use('Agg')
 
 import aitac
@@ -57,7 +59,7 @@ eval_loader = torch.utils.data.DataLoader(dataset=eval_dataset, batch_size=batch
 model = aitac.AITAC(num_classes, num_filters).to(device)
 
 # Loss and optimizer
-criterion = aitac.pearson_loss
+criterion = model_utils.pearson_loss
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 # train model

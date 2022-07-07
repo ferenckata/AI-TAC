@@ -9,11 +9,16 @@ import torch.utils.data
 # and determining importance of each filter on prediction
 class MotifCNN(nn.Module):
     """
-    Extracting motifs from trained AITAC model
+    Extracting motifs from the trained (AITAC) model
     """
     def __init__(self, original_model):
         """
-        Recreate layers as in AITAC CNN
+        Recreate layers as in the original (AITAC) model
+
+        Parameters
+        ----------
+        original_model: nn.Module
+            Original model with 7 layers, built to mimic AITAC
         """
         super().__init__()
         self.layer1_conv = nn.Sequential(*list(original_model.children())[0])
@@ -26,16 +31,16 @@ class MotifCNN(nn.Module):
         self.layer6 = nn.Sequential(*list(original_model.children())[6])
 
 
-    def forward(self, input, num_filters):
+    def forward(self, data_in, num_filters):
         """
         Recreate forward pass as in AITAC, but also including explanation
         """
         # add dummy dimension to input (for num channels=1)
-        input = torch.unsqueeze(input, 1)
+        data_in = torch.unsqueeze(data_in, 1)
         
         # Run convolutional layers
-        input = F.pad(input, (9, 9), mode='constant', value=0) # padding - last dimension goes first
-        out= self.layer1_conv(input)
+        data_in = F.pad(data_in, (9, 9), mode='constant', value=0) # padding - last dimension goes first
+        out= self.layer1_conv(data_in)
         layer1_activations = torch.squeeze(out)
         
         #do maxpooling and batch normalization for layer 1
