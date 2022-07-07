@@ -7,6 +7,7 @@ import sys
 matplotlib.use('Agg')
 
 import aitac
+import motif_cnn
 import plot_utils
 
 import time
@@ -39,12 +40,12 @@ dataset = torch.utils.data.TensorDataset(torch.from_numpy(x), torch.from_numpy(y
 data_loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False)
 
 # load trained model
-model = aitac.ConvNet(num_classes, num_filters).to(device)
+model = aitac.AITAC(num_classes, num_filters).to(device)
 checkpoint = torch.load('../models/' + model_name + '.ckpt')
 model.load_state_dict(checkpoint)
 
 #copy trained model weights to motif extraction model
-motif_model = aitac.motifCNN(model).to(device)
+motif_model = motif_cnn.motifCNN(model).to(device)
 motif_model.load_state_dict(model.state_dict())
 
 # run predictions with full model on all data

@@ -65,7 +65,7 @@ eval_loader = torch.utils.data.DataLoader(dataset=eval_dataset, batch_size=batch
 
 
 # create model 
-model = aitac.ConvNet(num_classes, num_filters).to(device)
+model = aitac.AITAC(num_classes, num_filters).to(device)
 
 # weights from model with 300 filters
 checkpoint = torch.load("../models/" + original_model + ".ckpt")

@@ -1,0 +1,76 @@
+"""File with class for extracting motifs from trained AITAC weights"""
+
+import torch
+from torch import nn
+import torch.nn.functional as F
+import torch.utils.data
+
+# define model for extracting motifs from first convolutional layer
+# and determining importance of each filter on prediction
+class MotifCNN(nn.Module):
+    """
+    Extracting motifs from trained AITAC model
+    """
+    def __init__(self, original_model):
+        """
+        Recreate layers as in AITAC CNN
+        """
+        super().__init__()
+        self.layer1_conv = nn.Sequential(*list(original_model.children())[0])
+        self.layer1_process = nn.Sequential(*list(original_model.children())[1])
+        self.layer2 = nn.Sequential(*list(original_model.children())[2])
+        self.layer3 = nn.Sequential(*list(original_model.children())[3])
+
+        self.layer4 = nn.Sequential(*list(original_model.children())[4])
+        self.layer5 = nn.Sequential(*list(original_model.children())[5])
+        self.layer6 = nn.Sequential(*list(original_model.children())[6])
+
+
+    def forward(self, input, num_filters):
+        """
+        Recreate forward pass as in AITAC, but also including explanation
+        """
+        # add dummy dimension to input (for num channels=1)
+        input = torch.unsqueeze(input, 1)
+        
+        # Run convolutional layers
+        input = F.pad(input, (9, 9), mode='constant', value=0) # padding - last dimension goes first
+        out= self.layer1_conv(input)
+        layer1_activations = torch.squeeze(out)
+        
+        #do maxpooling and batch normalization for layer 1
+        layer1_out = self.layer1_process(out)
+        layer1_out = F.pad(layer1_out, (5, 5), mode='constant', value=0)
+        
+        #calculate average activation by filter for the whole batch
+        filter_means_batch = layer1_activations.mean(0).mean(1)
+    
+        # run all other layers with 1 filter left out at a time
+        batch_size = layer1_out.shape[0]
+        predictions = torch.zeros(batch_size, num_filters,  81)
+
+
+        for i in range(num_filters):
+            #modify filter i of first layer output
+            filter_input = layer1_out.clone()
+
+            filter_input[:,i,:,:] = filter_input.new_full((batch_size, 1, 94), fill_value=filter_means_batch[i])
+
+            out = self.layer2(filter_input)
+            out = F.pad(out, (3, 3), mode='constant', value=0)
+            out = self.layer3(out)
+            
+            # Flatten output of convolutional layers
+            out = out.view(out.size()[0], -1)
+            
+            # run fully connected layers
+            out = self.layer4(out)
+            out = self.layer5(out)
+            out = self.layer6(out)
+            
+            predictions[:,i,:] = out
+
+            activations, act_index = torch.max(layer1_activations, dim=2)
+
+        return predictions, layer1_activations, act_index
+           
