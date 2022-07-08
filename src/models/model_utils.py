@@ -1,9 +1,11 @@
 """Class with static methods for model utils"""
+import copy
 import torch
 from torch import nn
-import copy
 
-class ModelUtils():
+from IO.IO import IO
+
+class ModelUtils:
     """Collection of utility functions"""
 
     @staticmethod
@@ -49,7 +51,15 @@ class ModelUtils():
 
 
     @staticmethod
-    def train_model(train_loader, test_loader, model: torch.nn.Module, device: torch.device, criterion: function, optimizer: torch.optim, num_epochs: int, output_directory: str) -> tuple:
+    def train_model(
+                train_loader,
+                test_loader,
+                model: nn.Module,
+                device: torch.device,
+                criterion: nn.Module,
+                optimizer: torch.optim,
+                num_epochs: int,
+                io_instance: IO) -> tuple:
         """Function to train model
 
         Parameters
@@ -58,10 +68,10 @@ class ModelUtils():
         test_loader: ??
         model: nn.Module
         device: torch.device
-        criterion: function ?
+        criterion: nn.Module
         optimizer: torch.optim
         num_epochs: int
-        output_directory: str
+        io_instance: str
 
         Return
         ------
@@ -70,11 +80,10 @@ class ModelUtils():
         model.train()
 
         #open files to log error
-        train_error = open(output_directory + "training_error.txt", "a", encoding='utf8')
-        test_error = open(output_directory + "test_error.txt", "a", encoding='utf8')
-        log_file = open(output_directory + "log.txt", "a", encoding='utf8')
+        train_error = "training_error.txt"
+        test_error = "test_error.txt"
 
-        best_model_wts = copy.deepcopy(model.state_dict())
+        best_model_weights = copy.deepcopy(model.state_dict())
         best_loss_valid = float('inf')
 
         for epoch in range(num_epochs):
@@ -94,37 +103,36 @@ class ModelUtils():
                 optimizer.step()
 
                 if (i+1) % 100 == 0:
-                    print (f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{total_step}], Loss: {loss.item():{10}.{4}}',
-                        file=log_file)
+                    log_line = f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{total_step}], Loss: {loss.item():{10}.{4}}'
+                    io_instance.log_to_file(log_line)
 
             # save training loss to file
             epoch_loss = running_loss / len(train_loader.dataset)
-            print(f"{epoch}, {epoch_loss}", file=train_error)
+            io_instance.write_to_file(train_error, f"{epoch}, {epoch_loss}")
 
             # calculate test loss for epoch
             test_loss = 0.0
             with torch.no_grad():
                 model.eval()
                 for i, (seqs, labels) in enumerate(test_loader):
-                    x = seqs.to(device)
-                    y = labels.to(device)
-                    outputs, _, _ = model(x)
-                    loss = criterion(outputs, y)
+                    input_x = seqs.to(device)
+                    label_y = labels.to(device)
+                    outputs, _, _ = model(input_x)
+                    loss = criterion(outputs, label_y)
                     test_loss += loss.item()
 
             test_loss = test_loss / len(test_loader.dataset)
 
-            #save outputs for epoch
-            print(f"{epoch}, {test_loss}", file=test_error)
+            # save outputs for epoch
+            io_instance.write_to_file(test_error, f"{epoch}, {test_loss}")
 
             if test_loss < best_loss_valid:
                 best_loss_valid = test_loss
-                best_model_wts = copy.deepcopy(model.state_dict())
-                print (f'Saving the best model weights at Epoch [{epoch+1}], Best Valid Loss: {best_loss_valid:{10}.{4}}')
+                best_model_weights = copy.deepcopy(model.state_dict())
+                log_line = f'Saving the best model weights at Epoch [{epoch+1}], Best Valid Loss: {best_loss_valid:{10}.{4}}'
+                io_instance.log_to_file(log_line)
 
-        train_error.close()
-        test_error.close()
-        model.load_state_dict(best_model_wts)
+        model.load_state_dict(best_model_weights)
         return model, best_loss_valid
 
 

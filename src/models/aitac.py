@@ -15,20 +15,20 @@ class AITAC(nn.Module):
         # for layer one, separate convolution and relu step from maxpool and batch normalization
         # to extract convolutional filters
         self.layer1_conv = nn.Sequential(
-            # padding is done in forward method along 1 dimension only, Conv2D would do in both dimensions
+            # padding is done in forward method along 1 dimension only, 
+            # Conv2D would do in both dimensions
             nn.Conv2d(in_channels=1,
                       out_channels=num_filters,
                       kernel_size=(4, 19),
                       stride=1,
                       padding=0),
             nn.ReLU())
-
         self.layer1_process = nn.Sequential(
             nn.MaxPool2d(kernel_size=(1,3), stride=(1,3), padding=(0,1)),
             nn.BatchNorm2d(num_filters))
-
-        self.layer2 = nn.Sequential(
-            # padding is done in forward method along 1 dimension only, Conv2D would do in both dimensions
+        self.layer2_conv = nn.Sequential(
+            # padding is done in forward method along 1 dimension only, 
+            # Conv2D would do in both dimensions
             nn.Conv2d(in_channels=num_filters,
                       out_channels=200,
                       kernel_size=(1, 11),
@@ -37,9 +37,9 @@ class AITAC(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(1,4), stride=(1,4), padding=(0,1)),
             nn.BatchNorm2d(200))
-
-        self.layer3 = nn.Sequential(
-            # padding is done in forward method along 1 dimension only, Conv2D would do in both dimensions
+        self.layer3_conv = nn.Sequential(
+            # padding is done in forward method along 1 dimension only, 
+            # Conv2D would do in both dimensions
             nn.Conv2d(in_channels=200,
                       out_channels=200,
                       kernel_size=(1, 7),
@@ -48,20 +48,17 @@ class AITAC(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(1, 4), stride=(1,4), padding=(0,1)),
             nn.BatchNorm2d(200))
-
-        self.layer4 = nn.Sequential(
+        self.layer3_lin = nn.Sequential(
             nn.Linear(in_features=1000,
                       out_features=1000),
             nn.ReLU(),
             nn.Dropout(p=0.03))
-
-        self.layer5 = nn.Sequential(
+        self.layer3_lin = nn.Sequential(
             nn.Linear(in_features=1000,
                       out_features=1000),
             nn.ReLU(),
             nn.Dropout(p=0.03))
-
-        self.layer6 = nn.Sequential(
+        self.layer3_lin = nn.Sequential(
                 nn.Linear(in_features=1000,
                           out_features=num_classes))#,
                 #nn.Sigmoid())
@@ -77,28 +74,23 @@ class AITAC(nn.Module):
         # run all layers on input data
         # add dummy dimension to input (for num channels=1)
         data_in = torch.unsqueeze(data_in, 1)
-
         # Run convolutional layers
-        # padding - last dimension goes first, done here so that it is added along one dimension only
+        # padding - last dimension goes first,
+        # done here so that it is added along one dimension only
         data_in = F.pad(data_in, (9, 9), mode='constant', value=0)
         out = self.layer1_conv(data_in)
         activations = torch.squeeze(out)
         out = self.layer1_process(out)
-        
         out = F.pad(out, (5, 5), mode='constant', value=0)
-        out = self.layer2(out)
-
+        out = self.layer2_conv(out)
         out = F.pad(out, (3, 3), mode='constant', value=0)
-        out = self.layer3(out)
-        
+        out = self.layer3_conv(out)
         # Flatten output of convolutional layers
         out = out.view(out.size()[0], -1)
-        
         # run fully connected layers
-        out = self.layer4(out)
-        out = self.layer5(out)
-        predictions = self.layer6(out)
-        
+        out = self.layer3_lin(out)
+        out = self.layer3_lin(out)
+        predictions = self.layer3_lin(out)
         activations, act_index = torch.max(activations, dim=2)
-        
+
         return predictions, activations, act_index

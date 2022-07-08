@@ -6,7 +6,7 @@ import _pickle as pickle
 import yaml
 import numpy as np
 
-class IO():
+class IO:
     """
     Class with input/output responsibilities
     """
@@ -58,8 +58,17 @@ class IO():
         """
         Log message
         """
-        with open(self.config["log"], "a") as log_file:
+        with open(self.config["log"], "a", encoding='utf8') as log_file:
             log_file.write(message + "\n")
+
+
+    def write_to_file(self, filename: str, message: str) -> None:
+        """
+        Write any message to any file
+        """
+        out_path = os.path.join(self.config["output_directory"], filename)
+        with open(out_path, "a", encoding='utf8') as out_file:
+            out_file.write(message + "\n")
 
 
     @staticmethod
