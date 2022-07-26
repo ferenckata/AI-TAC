@@ -60,7 +60,7 @@ def cross_validate(x, y, peak_names, output_file_path):
 
 
         # create model 
-        model = aitac.ConvNet(num_classes, num_filters).to(device)
+        model = aitac.AITAC(num_classes, num_filters).to(device)
 
         # Loss and optimizer
         criterion = aitac.pearson_loss
