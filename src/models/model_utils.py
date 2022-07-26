@@ -3,7 +3,7 @@ import copy
 import torch
 from torch import nn
 
-from IO.IO import IO
+from src.utils.IO import IO
 
 class ModelUtils:
     """Collection of utility functions"""

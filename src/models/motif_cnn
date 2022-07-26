@@ -1,21 +1,22 @@
 """File with class for extracting motifs from trained AITAC weights"""
 
+from typing import Tuple
 import torch
 import torch.nn.functional as F
 import torch.utils.data
 
-from aitac import AITAC
+from src.models.aitac import AITAC
 
 # define model for extracting motifs from first convolutional layer
 # and determining importance of each filter on prediction
 
 # why not inherit and override from AITAC?
-class MotifCNN(AITAC):
+class MotifExtractionCNN(AITAC):
     """
     Extracting motifs from the trained (AITAC) model
     """
 
-    def forward(self, data_in, num_filters):
+    def forward(self, data_in: torch.Tensor) -> Tuple:
         """
         Recreate forward pass as in AITAC, but also including explanation
         """
@@ -33,8 +34,8 @@ class MotifCNN(AITAC):
         filter_means_batch = layer1_activations.mean(0).mean(1)
         # run all other layers with 1 filter left out at a time
         batch_size = layer1_out.shape[0]
-        predictions = torch.zeros(batch_size, num_filters,  81)
-        for i in range(num_filters):
+        predictions = torch.zeros(batch_size, self.num_filters,  81)
+        for i in range(self.num_filters):
             # modify filter i of first layer output
             filter_input = layer1_out.clone()
             # why 94?

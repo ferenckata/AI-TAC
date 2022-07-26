@@ -6,11 +6,12 @@ import os
 import sys
 matplotlib.use('Agg')
 
-import aitac
-import plot_utils
+from src.models import aitac
+from src.models import motif_cnn
+from src.models import plot_utils
+from src.models.model_utils import ModelUtils
 
 import time
-from sklearn.model_selection import train_test_split
 
 # Device configuration
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -44,11 +45,11 @@ checkpoint = torch.load('../models/' + model_name + '.ckpt')
 model.load_state_dict(checkpoint)
 
 #copy trained model weights to motif extraction model
-motif_model = aitac.MotifExtractionCNN(model).to(device)
+motif_model = motif_cnn.MotifExtractionCNN(model).to(device)
 motif_model.load_state_dict(model.state_dict())
 
 # run predictions with full model on all data
-pred_full_model, max_activations, activation_idx = aitac.test_model(data_loader, model, device)
+pred_full_model, max_activations, activation_idx = ModelUtils.test_model(data_loader, model, device)
 correlations = plot_utils.plot_cors(y, pred_full_model, output_file_path)
 
 
@@ -69,7 +70,7 @@ correlations2 = plot_utils.plot_cors(y2, pred_full_model2, output_file_path)
 
 # get first layer activations and predictions with leave-one-filter-out
 start = time.time()
-activations, predictions = aitac.get_motifs(data_loader, motif_model, device)
+activations, predictions = ModelUtils.get_motifs(data_loader, motif_model, device)
 print(time.time()- start)
 
 filt_corr, filt_infl, ave_filt_infl = plot_utils.plot_filt_corr(predictions, y2, correlations2, output_file_path)

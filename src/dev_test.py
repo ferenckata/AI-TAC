@@ -1,4 +1,5 @@
-"""Main AITAC model"""
+# pylint: disable-all
+#%%
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -8,29 +9,28 @@ import torch.utils.data
 class AITAC(nn.Module):
     """Main AITAC model
     """
-    def __init__(self, num_classes: int, num_filters: int) -> None:
+    def __init__(self, num_classes, num_filters):
         """Main AITAC model
         """
         super().__init__()
-        self.num_filters = num_filters
         # for layer one, separate convolution and relu step from maxpool and batch normalization
         # to extract convolutional filters
         self.layer1_conv = nn.Sequential(
             # padding is done in forward method along 1 dimension only, 
             # Conv2D would do in both dimensions
             nn.Conv2d(in_channels=1,
-                      out_channels=self.num_filters,
+                      out_channels=num_filters,
                       kernel_size=(4, 19), # 4 channel, 19 long sequences
                       stride=1,
                       padding=0),
             nn.ReLU())
         self.layer1_process = nn.Sequential(
             nn.MaxPool2d(kernel_size=(1,3), stride=(1,3), padding=(0,1)),
-            nn.BatchNorm2d(self.num_filters))
+            nn.BatchNorm2d(num_filters))
         self.layer2_conv = nn.Sequential(
             # padding is done in forward method along 1 dimension only, 
             # Conv2D would do in both dimensions
-            nn.Conv2d(in_channels=self.num_filters,
+            nn.Conv2d(in_channels=num_filters,
                       out_channels=200,
                       kernel_size=(1, 11),
                       stride=1,
@@ -65,7 +65,7 @@ class AITAC(nn.Module):
                 #nn.Sigmoid())
 
 
-    def forward(self, data_in: torch.Tensor) -> Tuple:
+    def forward(self, data_in):
         """Forward pass
         Parameters
         ----------
@@ -95,3 +95,28 @@ class AITAC(nn.Module):
         activations, act_index = torch.max(activations, dim=2)
 
         return predictions, activations, act_index
+
+#%%
+class MotifCNN(AITAC):
+    
+    def get_layer1(self):
+        return self.layer1_conv
+
+#%%
+test_cnn = MotifCNN(4,1)
+#%%
+test_cnn.get_layer1()
+
+#%%
+class AnotherMotifCNN(nn.Module):
+    def __init__(self, original_model) -> None:
+        super(AnotherMotifCNN, self).__init__()
+        self.layer1_conv = nn.Sequential(*list(original_model.children())[0])
+    
+    def get_layer1(self):
+        return self.layer1_conv
+#%%
+my_aitac = AITAC(4,1)
+another_test_cnn = AnotherMotifCNN(my_aitac)
+#%%
+another_test_cnn.get_layer1()

@@ -1,8 +1,9 @@
 """ This module is for preprocessing input files for subsequent deep learning applications """
 
+from typing import List, Tuple
 import numpy as np
-from data_processing.preprocess_utils import PreprocessingMethods as PM
-from IO.IO import IO as my_io
+from src.data_processing.preprocess_utils import PreprocessingMethods as PM
+from src.utils.IO import IO as my_io
 
 class Preprocessor():
     """
@@ -19,7 +20,14 @@ class Preprocessor():
 
     """
 
-    def __init__(self, data_file, intensity_file, reference_genome_dir, output_directory, num_chr, region_size):
+    def __init__(
+            self,
+            data_file: str,
+            intensity_file: str,
+            reference_genome_dir: str,
+            output_directory: str,
+            num_chr: int,
+            region_size: int) -> None:
         """
         Constructor
 
@@ -53,7 +61,7 @@ class Preprocessor():
         my_io.create_directory_if_not_exists(self.output_directory)
 
 
-    def read_in_data(self):
+    def read_in_data(self) -> Tuple:
         """
         Function to extract data from file and save to file for later usage
 
@@ -73,11 +81,11 @@ class Preprocessor():
             my_io.save_data_in_pickle(chr_dict, self.output_directory, 'chr_dict')
         else:
             chr_dict = my_io.read_pickle(self.output_directory, 'chr_dict')
+        my_io.save_data_in_json(skipped_peaks, self.output_directory, 'peaks_of_invalid_length')
+        return positions, chr_dict
 
-        return positions, chr_dict, skipped_peaks
 
-
-    def reformat_data(self, positions, chr_dict):
+    def reformat_data(self, positions: dict, chr_dict: dict) -> None:
         """
         Acquire encoded sequences and peak intensities of valid positions
 
@@ -99,16 +107,13 @@ class Preprocessor():
             Sequences of input regions (num_positions x seq_length ?? )
         cell_type_array: numpy.ndarray
             Matrix of peak intensity values across cell type (num_positions x num_celltypes)
-        invalid_ids: list
-            Names of invalid input regions (num_invalid_positions x name_length ?? )
         """
-        one_hot_seqs, peak_seqs, sequence_peak_names, invalid_ids = PM.get_sequences(positions,
-                                                                                    chr_dict,
-                                                                                    self.num_chr)
-        
+        one_hot_seqs, peak_seqs, sequence_peak_names, invalid_ids = PM.get_sequences(
+            positions,
+            chr_dict,
+            self.num_chr)
         # read in all intensity values and peak names
         cell_type_array, intensity_peak_names = PM.read_intensities(self.intensity_file)
-
         # take one_hot encoding of valid sequences of only those peaks that
         # have associated intensity values in cell_type_array
         valid_peak_ids = np.intersect1d(sequence_peak_names, intensity_peak_names)
@@ -117,12 +122,10 @@ class Preprocessor():
         sequence_peak_names = seq_data_values[0]
         one_hot_seqs = seq_data_values[1]
         peak_seqs = seq_data_values[2]
-
         peak_data_values = PM.filter_matrix(intensity_peak_names, valid_peak_ids,
                                             cell_type_array)
         intensity_peak_names = peak_data_values[0]
         cell_type_array = peak_data_values[1]
-
         # throw error here, add test for it
         if np.sum(sequence_peak_names != intensity_peak_names) > 0:
             raise AssertionError("Order of peaks not matching for sequences/intensities!")
@@ -130,37 +133,15 @@ class Preprocessor():
             print(sequence_peak_names[0:10])
             print(valid_peak_ids[0:10])
             raise AssertionError("Order of peaks not matching for sequences/valid positions!")
-
-        return valid_peak_ids, one_hot_seqs, peak_seqs, cell_type_array, invalid_ids
-
-
-    def save_data_to_file(self, valid_peak_ids, one_hot_seqs, peak_seqs, cell_type_array, invalid_ids, skipped_peaks):
-        """
-        Function to save all the data created in this process
-
-        Parameters
-        ----------
-        valid_peak_ids: numpy.ndarray
-            Names of valid input regions (num_valid_positions x name_length ?? )
-        one_hot_seqs: numpy.ndarray
-            One-hot encoded sequences of input regions (num_positions x 4 x seq_length)
-        peak_seqs: numpy.ndarray
-            Sequences of input regions (num_positions x seq_length ?? )
-        cell_type_array: numpy.ndarray
-            Matrix of peak intensity values across cell type (num_positions x num_celltypes)
-        invalid_ids: list
-            Names of invalid input regions (num_invalid_positions x name_length ?? )
-        """
         # write position and sequence data to file
         my_io.numpy_save(one_hot_seqs, self.output_directory, 'one_hot_seqs')
         my_io.numpy_save(valid_peak_ids, self.output_directory, 'peak_names')
         my_io.numpy_save(peak_seqs, self.output_directory, 'peak_seqs')
         my_io.numpy_save(cell_type_array, self.output_directory, 'cell_type_array')
-
-        # save position names of invalid sequences
-        my_io.save_data_in_json(invalid_ids, self.output_directory, 'invalid_ids')
-        my_io.save_data_in_json(skipped_peaks, self.output_directory, 'peaks_of_invalid_length')
-
         # write peak sequences to fasta file
         out_seq_filename = 'peak_sequences'
         my_io.write_seq_to_fasta(peak_seqs, valid_peak_ids, self.output_directory, out_seq_filename)
+        # save position names of invalid sequences
+        my_io.save_data_in_json(invalid_ids, self.output_directory, 'invalid_ids')
+
+        return

@@ -79,14 +79,15 @@ class TestPreprocessingMethods(unittest.TestCase):
             Seq("agatgctgctgatcgatcgatgctaggatcga"),
             id="testX",name="testX",
             description="testX",)
-        expected_output = {"test1":record_test1,
-                           "test2":record_test2,
-                           "test3":record_test3,
-                           "test4":record_test4,
-                           "test5":record_test5,
-                           "test6":record_test6,
-                           "test7":record_test7,
-                           "testX":record_testx}
+        expected_output = {
+            "test1":record_test1,
+            "test2":record_test2,
+            "test3":record_test3,
+            "test4":record_test4,
+            "test5":record_test5,
+            "test6":record_test6,
+            "test7":record_test7,
+            "testX":record_testx}
         actual_output = pp.PreprocessingMethods.read_fasta(test_fasta_dir, test_chr_num)
         self.assertEqual([rec.seq for rec in actual_output.values()],
                         [rec.seq for rec in expected_output.values()])
@@ -113,10 +114,11 @@ class TestPreprocessingMethods(unittest.TestCase):
         Test encoding of lowercase sequence characters
         """
         test_string = "aagctg"
-        expected_encoding = np.array([1,1,0,0,0,0,
-                                      0,0,0,0,1,0,
-                                      0,0,1,0,0,1,
-                                      0,0,0,1,0,0], dtype = 'int8').reshape(4,6)
+        expected_encoding = np.array(
+            [1,1,0,0,0,0,
+            0,0,0,0,1,0,
+            0,0,1,0,0,1,
+            0,0,0,1,0,0], dtype = 'int8').reshape(4,6)
         actual_encoding = pp.PreprocessingMethods.one_hot_encoder(test_string)
         np.testing.assert_array_equal(actual_encoding, expected_encoding)
 
@@ -158,25 +160,30 @@ class TestPreprocessingMethods(unittest.TestCase):
             Seq("AGATAGTAGAAATGGCGCGCTGGCGCGCAATATAGTAATTGGAA"),
             id="chr2",name="chr2",
             description="chr2",)
-        test_chr_seq = {"chr1":record_test1,
-                        "chr2":record_test2
-                        }
+        test_chr_seq = {
+            "chr1":record_test1,
+            "chr2":record_test2
+            }
         test_num_chr = 2
-        expected_ohs = np.stack((np.array([0,0,1,0,1,
-                                           0,1,0,0,0,
-                                           1,0,0,1,0,
-                                           0,0,0,0,0], dtype = 'int8').reshape(4,5),
-                                np.array([0,0,0,0,0,
-                                          0,0,0,0,0,
-                                          1,0,1,0,1,
-                                          0,1,0,1,0], dtype = 'int8').reshape(4,5)
-                                ))
+        expected_ohs = np.stack(
+            (np.array(
+                [0,0,1,0,1,
+                0,1,0,0,0,
+                1,0,0,1,0,
+                0,0,0,0,0], dtype = 'int8').reshape(4,5),
+            np.array(
+                [0,0,0,0,0,
+                0,0,0,0,0,
+                1,0,1,0,1,
+                0,1,0,1,0], dtype = 'int8').reshape(4,5)
+            ))
         expected_ps = np.stack(["GTAGA".lower(), "GCGCG".lower()])
         expected_pn = np.stack([2, 3])
         ecpected_ii = [1]
-        actual_ohs, actual_ps, actual_pn, actual_ii = pp.PreprocessingMethods.get_sequences(test_positions,
-                                                                                    test_chr_seq,
-                                                                                    test_num_chr)
+        actual_ohs, actual_ps, actual_pn, actual_ii = pp.PreprocessingMethods.get_sequences(
+            test_positions,
+            test_chr_seq,
+            test_num_chr)
         np.testing.assert_array_equal(actual_ohs, expected_ohs)
         np.testing.assert_array_equal(actual_ps, expected_ps)
         np.testing.assert_array_equal(actual_pn, expected_pn)
@@ -215,40 +222,51 @@ class TestPreprocessingMethods(unittest.TestCase):
 
         test_valid_ids = np.array([1, 2])
         test_1d = np.stack([1, 2, 3])
-        test_2d = np.stack([['0.41', '0.71', '0.9','0.11'],
-                                         ['0.41', '1.64', '0.9', '0.83'],
-                                         ['2.36', '0.1', '0.9', '0.11']])
+        test_2d = np.stack(
+            [['0.41', '0.71', '0.9','0.11'],
+            ['0.41', '1.64', '0.9', '0.83'],
+            ['2.36', '0.1', '0.9', '0.11']])
         test_2d = test_2d.astype(np.float32)
-        test_3d = np.stack((np.array([0,0,1,0,1,
-                                       0,1,0,0,0,
-                                       1,0,0,1,0,
-                                       0,0,0,0,0], dtype = 'int8').reshape(4,5),
-                             np.array([0,0,0,0,0,
-                                       0,0,0,0,0,
-                                       1,0,1,0,1,
-                                       0,1,0,1,0], dtype = 'int8').reshape(4,5),
-                             np.array([1,1,1,0,0,
-                                       0,0,0,0,0,
-                                       0,0,0,0,1,
-                                       0,0,0,1,0], dtype = 'int8').reshape(4,5)
-                            ))
+        test_3d = np.stack(
+            (np.array(
+                [0,0,1,0,1,
+                0,1,0,0,0,
+                1,0,0,1,0,
+                0,0,0,0,0], dtype = 'int8').reshape(4,5),
+            np.array(
+                [0,0,0,0,0,
+                0,0,0,0,0,
+                1,0,1,0,1,
+                0,1,0,1,0], dtype = 'int8').reshape(4,5),
+            np.array(
+                [1,1,1,0,0,
+                0,0,0,0,0,
+                0,0,0,0,1,
+                0,0,0,1,0], dtype = 'int8').reshape(4,5)
+            )
+        )
         expected_1d = np.array([1, 2])
         expected_2d = np.stack([['0.41', '0.71', '0.9','0.11'],
                                 ['0.41', '1.64', '0.9', '0.83']])
         expected_2d = expected_2d.astype(np.float32)
-        expected_3d = np.stack((np.array([0,0,1,0,1,
-                                           0,1,0,0,0,
-                                           1,0,0,1,0,
-                                           0,0,0,0,0], dtype = 'int8').reshape(4,5),
-                                 np.array([0,0,0,0,0,
-                                           0,0,0,0,0,
-                                           1,0,1,0,1,
-                                           0,1,0,1,0], dtype = 'int8').reshape(4,5)
-                                ))
-        actual_filtered_values = pp.PreprocessingMethods.filter_matrix(test_1d,
-                                                                       test_valid_ids,
-                                                                       test_2d,
-                                                                       test_3d)
+        expected_3d = np.stack(
+            (np.array(
+                [0,0,1,0,1,
+                0,1,0,0,0,
+                1,0,0,1,0,
+                0,0,0,0,0], dtype = 'int8').reshape(4,5),
+            np.array(
+                [0,0,0,0,0,
+                0,0,0,0,0,
+                1,0,1,0,1,
+                0,1,0,1,0], dtype = 'int8').reshape(4,5)
+            )
+        )
+        actual_filtered_values = pp.PreprocessingMethods.filter_matrix(
+            test_1d,
+            test_valid_ids,
+            test_2d,
+            test_3d)
         np.testing.assert_array_equal(actual_filtered_values[0], expected_1d)
         np.testing.assert_array_equal(actual_filtered_values[1], expected_2d)
         np.testing.assert_array_equal(actual_filtered_values[2], expected_3d)

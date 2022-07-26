@@ -5,7 +5,8 @@ for subsequent deep learning application
 from collections import defaultdict
 from Bio import SeqIO
 import numpy as np
-from IO.IO import IO as my_io
+
+from src.utils.IO import IO as my_io
 
 class PreprocessingMethods():
     """
@@ -179,6 +180,7 @@ class PreprocessingMethods():
                 return None
 
         return encoding
+
 
     @staticmethod
     def get_sequences(positions, chr_dict, num_chr):
