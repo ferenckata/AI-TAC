@@ -58,7 +58,7 @@ class IO():
         """
         Log message
         """
-        with open(self.config["log"], "a") as log_file:
+        with open(self.config["log"], "a", encoding='utf8') as log_file:
             log_file.write(message + "\n")
 
 

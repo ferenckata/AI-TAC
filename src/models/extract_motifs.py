@@ -44,7 +44,7 @@ checkpoint = torch.load('../models/' + model_name + '.ckpt')
 model.load_state_dict(checkpoint)
 
 #copy trained model weights to motif extraction model
-motif_model = aitac.motifCNN(model).to(device)
+motif_model = aitac.MotifExtractionCNN(model).to(device)
 motif_model.load_state_dict(model.state_dict())
 
 # run predictions with full model on all data

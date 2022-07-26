@@ -1,7 +1,7 @@
 """File to provide entry points to user interaction"""
 
 from data_processing.preprocess_data import Preprocessor
-from IO.IO import IO
+from src.IO import IO
 
 class UserInterface():
     """

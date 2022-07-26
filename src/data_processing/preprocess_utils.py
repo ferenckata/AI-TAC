@@ -5,7 +5,7 @@ for subsequent deep learning application
 from collections import defaultdict
 from Bio import SeqIO
 import numpy as np
-from src.IO.IO import IO as my_io
+from IO.IO import IO as my_io
 
 class PreprocessingMethods():
     """
