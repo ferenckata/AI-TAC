@@ -7,11 +7,11 @@ import os
 import sys
 import pathlib
 
-from models import model_utils
+from src.models.model_utils import ModelUtils
 matplotlib.use('Agg')
 
-import aitac
-import plot_utils
+from src.models import aitac
+from src.utils import plot_utils
 
 
 # Device configuration
@@ -30,7 +30,7 @@ output_file_path = "../outputs/" + model_name + "/training/"
 directory = os.path.dirname(output_file_path)
 if not os.path.exists(directory):
     print("Creating directory %s" % output_file_path)
-    pathlib.Path(output_file_path).mkdir(parents=True, exist_ok=True) 
+    pathlib.Path(output_file_path).mkdir(parents=True, exist_ok=True)
 else:
      print("Directory %s exists" % output_file_path)
 
@@ -59,11 +59,11 @@ eval_loader = torch.utils.data.DataLoader(dataset=eval_dataset, batch_size=batch
 model = aitac.AITAC(num_classes, num_filters).to(device)
 
 # Loss and optimizer
-criterion = model_utils.pearson_loss
+criterion = ModelUtils.pearson_loss
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 # train model
-model, best_loss = aitac.train_model(train_loader, eval_loader, model, device, criterion,  optimizer, num_epochs, output_file_path)
+model, best_loss = ModelUtils.train_model(train_loader, eval_loader, model, device, criterion,  optimizer, num_epochs, output_file_path)
 
 # save the model checkpoint
 models_file_path = "../models/"
@@ -80,7 +80,7 @@ torch.save(model.state_dict(), '../models/' + model_name + '.ckpt')
 torch.save(model, '../models/' + model_name + '.pth')
 
 # Predict on test set
-predictions, max_activations, max_act_index = aitac.test_model(eval_loader, model, device)
+predictions, max_activations, max_act_index = ModelUtils.test_model(eval_loader, model, device)
 
 
 #-------------------------------------------#

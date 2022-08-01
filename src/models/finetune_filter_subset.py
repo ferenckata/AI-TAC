@@ -7,8 +7,9 @@ import os
 import sys
 matplotlib.use('Agg')
 
-import aitac
-import plot_utils
+from src.models import aitac
+from src.models.model_utils import ModelUtils
+from src.utils import plot_utils
 
 
 # Device configuration
@@ -102,11 +103,11 @@ freeze_layer(model.layer1_conv)
 
 
 # Loss and optimizer
-criterion = aitac.pearson_loss
+criterion = ModelUtils.pearson_loss
 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=learning_rate)
 
 # train model
-model, best_loss_valid = aitac.train_model(train_loader, valid_loader, model, device, criterion,  optimizer, num_epochs, output_file_path)
+model, best_loss_valid = ModelUtils.train_model(train_loader, valid_loader, model, device, criterion,  optimizer, num_epochs, output_file_path)
 
 # save the model checkpoint
 torch.save(model.state_dict(), '../models/model' + model_name + '.ckpt')
@@ -115,7 +116,7 @@ torch.save(model.state_dict(), '../models/model' + model_name + '.ckpt')
 torch.save(model, '../models/model' + model_name + '.pth')
 
 # Predict on test set
-predictions, max_activations, max_act_index = aitac.test_model(eval_loader, model, device)
+predictions, max_activations, max_act_index = ModelUtils.test_model(eval_loader, model, device)
 
 
 #-------------------------------------------#

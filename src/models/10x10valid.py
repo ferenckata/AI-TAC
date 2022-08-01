@@ -9,8 +9,9 @@ import os
 import sys
 matplotlib.use('Agg')
 
-import aitac
-import plot_utils
+from src.models import aitac
+from src.models.model_utils import ModelUtils
+from src.utils import plot_utils
 
 #create output directory
 output_file_path = "../outputs/valid10x10/"
@@ -63,14 +64,14 @@ def cross_validate(x, y, peak_names, output_file_path):
         model = aitac.AITAC(num_classes, num_filters).to(device)
 
         # Loss and optimizer
-        criterion = aitac.pearson_loss
+        criterion = ModelUtils.pearson_loss
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
         # train model
-        model, best_loss = aitac.train_model(train_loader, eval_loader, model, device, criterion,  optimizer, num_epochs, output_file_path)
+        model, best_loss = ModelUtils.train_model(train_loader, eval_loader, model, device, criterion,  optimizer, num_epochs, output_file_path)
 
         # Predict on test set
-        predictions, max_activations, max_act_index = aitac.test_model(eval_loader, model, device)
+        predictions, max_activations, max_act_index = ModelUtils.test_model(eval_loader, model, device)
 
         # plot the correlations histogram
         correlations = plot_utils.plot_cors(eval_labels, predictions, output_file_path)

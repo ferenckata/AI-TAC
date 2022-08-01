@@ -141,14 +141,14 @@ class ModelUtils:
         """
         Test trained model on test data
         """
-        num_filters=model.layer1_conv[0].out_channels
+        num_filters = model.layer1_conv[0].out_channels
         predictions = torch.zeros(0, 81)
         max_activations = torch.zeros(0, num_filters)
         act_index = torch.zeros(0, num_filters)
 
         with torch.no_grad():
             model.eval()
-            for seqs, _ in test_loader: # why is it not using the labels?
+            for seqs, _ in test_loader:
                 seqs = seqs.to(device)
                 pred, act, idx = model(seqs)
                 predictions = torch.cat((predictions, pred.type(torch.FloatTensor)), 0)

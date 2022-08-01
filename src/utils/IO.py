@@ -82,8 +82,7 @@ class IO:
             Path to directory to create
         """
         directory = os.path.dirname(directory_path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
 
     @staticmethod

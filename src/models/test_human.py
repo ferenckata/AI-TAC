@@ -7,8 +7,8 @@ import os
 import sys
 matplotlib.use('Agg')
 
-import aitac
-import plot_utils
+from src.models import aitac
+from src.utils import plot_utils
 
 import time
 from sklearn.model_selection import train_test_split

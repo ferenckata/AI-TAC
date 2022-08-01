@@ -34,14 +34,16 @@ class MotifExtractionCNN(AITAC):
         filter_means_batch = layer1_activations.mean(0).mean(1)
         # run all other layers with 1 filter left out at a time
         batch_size = layer1_out.shape[0]
+        # 81 = number of classes
         predictions = torch.zeros(batch_size, self.num_filters,  81)
         for i in range(self.num_filters):
             # modify filter i of first layer output
             filter_input = layer1_out.clone()
+            # num_channels = 1
             # why 94?
             filter_input[:,i,:,:] = filter_input.new_full(
-                    (batch_size, 1, 94),
-                    fill_value=filter_means_batch[i])
+                (batch_size, 1, 94),
+                fill_value = filter_means_batch[i])
             out = self.layer2_conv(filter_input)
             out = F.pad(out, (3, 3), mode='constant', value=0)
             out = self.layer3_conv(out)

@@ -1,4 +1,6 @@
 """Main AITAC model"""
+from typing import Tuple
+
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -16,7 +18,7 @@ class AITAC(nn.Module):
         # for layer one, separate convolution and relu step from maxpool and batch normalization
         # to extract convolutional filters
         self.layer1_conv = nn.Sequential(
-            # padding is done in forward method along 1 dimension only, 
+            # padding is done in forward method along 1 dimension only,
             # Conv2D would do in both dimensions
             nn.Conv2d(in_channels=1,
                       out_channels=self.num_filters,
@@ -28,7 +30,7 @@ class AITAC(nn.Module):
             nn.MaxPool2d(kernel_size=(1,3), stride=(1,3), padding=(0,1)),
             nn.BatchNorm2d(self.num_filters))
         self.layer2_conv = nn.Sequential(
-            # padding is done in forward method along 1 dimension only, 
+            # padding is done in forward method along 1 dimension only,
             # Conv2D would do in both dimensions
             nn.Conv2d(in_channels=self.num_filters,
                       out_channels=200,
@@ -39,7 +41,7 @@ class AITAC(nn.Module):
             nn.MaxPool2d(kernel_size=(1,4), stride=(1,4), padding=(0,1)),
             nn.BatchNorm2d(200))
         self.layer3_conv = nn.Sequential(
-            # padding is done in forward method along 1 dimension only, 
+            # padding is done in forward method along 1 dimension only,
             # Conv2D would do in both dimensions
             nn.Conv2d(in_channels=200,
                       out_channels=200,

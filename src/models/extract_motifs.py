@@ -8,7 +8,7 @@ matplotlib.use('Agg')
 
 from src.models import aitac
 from src.models import motif_cnn
-from src.models import plot_utils
+from src.utils import plot_utils
 from src.models.model_utils import ModelUtils
 
 import time
@@ -24,10 +24,7 @@ num_filters = 300
 #create output figure directory
 model_name = sys.argv[1]
 output_file_path = "../outputs/" + model_name + "/motifs/"
-directory = os.path.dirname(output_file_path)
-if not os.path.exists(directory):
-    os.makedirs(directory)
-
+os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
 
 # Load all data
 x = np.load(sys.argv[2])
@@ -44,14 +41,13 @@ model = aitac.AITAC(num_classes, num_filters).to(device)
 checkpoint = torch.load('../models/' + model_name + '.ckpt')
 model.load_state_dict(checkpoint)
 
-#copy trained model weights to motif extraction model
-motif_model = motif_cnn.MotifExtractionCNN(model).to(device)
+# copy trained model weights to motif extraction model
+motif_model = motif_cnn.MotifExtractionCNN(num_classes, num_filters).to(device)
 motif_model.load_state_dict(model.state_dict())
 
 # run predictions with full model on all data
 pred_full_model, max_activations, activation_idx = ModelUtils.test_model(data_loader, model, device)
 correlations = plot_utils.plot_cors(y, pred_full_model, output_file_path)
-
 
 # find well predicted OCRs
 idx = np.argwhere(np.asarray(correlations)>0.75).squeeze()
@@ -67,17 +63,24 @@ data_loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=batch_size
 pred_full_model2 = pred_full_model[idx,:]
 correlations2 = plot_utils.plot_cors(y2, pred_full_model2, output_file_path)
 
-
 # get first layer activations and predictions with leave-one-filter-out
 start = time.time()
 activations, predictions = ModelUtils.get_motifs(data_loader, motif_model, device)
 print(time.time()- start)
 
-filt_corr, filt_infl, ave_filt_infl = plot_utils.plot_filt_corr(predictions, y2, correlations2, output_file_path)
+filt_corr, filt_infl, ave_filt_infl = plot_utils.plot_filt_corr(
+    predictions,
+    y2,
+    correlations2,
+    output_file_path)
 
 infl, infl_by_OCR = plot_utils.plot_filt_infl(pred_full_model2, predictions, output_file_path)
 
-pwm, act_ind, nseqs, activated_OCRs, n_activated_OCRs, OCR_matrix = plot_utils.get_memes(activations, x2, y2, output_file_path)
+pwm, act_ind, nseqs, activated_OCRs, n_activated_OCRs, OCR_matrix = plot_utils.get_memes(
+    activations,
+    x2,
+    y2,
+    output_file_path)
 
 
 #save predictions
