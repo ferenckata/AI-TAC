@@ -2,6 +2,8 @@
 import copy
 import torch
 from torch import nn
+from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader
 
 from src.utils.IO import IO
 
@@ -52,8 +54,8 @@ class ModelUtils:
 
     @staticmethod
     def train_model(
-                train_loader,
-                test_loader,
+                train_loader: DataLoader,
+                test_loader: DataLoader,
                 model: nn.Module,
                 device: torch.device,
                 criterion: nn.Module,
@@ -64,8 +66,8 @@ class ModelUtils:
 
         Parameters
         ----------
-        train_loader: ??
-        test_loader: ??
+        train_loader: DataLoader
+        test_loader: DataLoader
         model: nn.Module
         device: torch.device
         criterion: nn.Module

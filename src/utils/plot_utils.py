@@ -187,7 +187,13 @@ def plot_corr_variance(labels, correlations, output_file_path):
 
 
 # plot some predictions vs ground_truth on test set
-def plot_random_predictions(eval_labels, predictions, correlations, ind_collection, eval_names, output_file_path):
+def plot_random_predictions(
+        eval_labels,
+        predictions,
+        correlations,
+        ind_collection,
+        eval_names,
+        output_file_path):
     for n in range(3):
         mum_plt_row = 1
         mum_plt_col = 1
