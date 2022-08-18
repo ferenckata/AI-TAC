@@ -18,7 +18,7 @@ class UserInterface:
         Method to run preprocessing steps
         """
         my_io = IO(
-            "/projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_refactored/AI-TAC/config.yml"
+            "config.yml"
             )
         data_file = my_io.get_config_entry("data_file")
         intensity_file = my_io.get_config_entry("intensity_file")
@@ -72,7 +72,6 @@ class UserInterface:
         y = y.astype(np.float32)
         peak_names = np.load(peak_names_file)
         print("create model instance")
-        # ToDo: fix folder structure
         tt_instance = train_test_aitac.TrainTestModel()
         tt_instance.create_out_directory(model_name)
         print("create data loader")
