@@ -12,7 +12,8 @@ reference_genome_dir: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_
 # number of chromsomes in the reference genome not including X and Y
 num_chr: 19
 # name for output folder
-output_directory: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/mouse_immune_data/
+# output_directory: /projects/ec31/mathelier-group/katalitf/AITAC_test/AI-TAC_anthony/mouse_immune_data/
+output_directory: /home/katalitf/Documents/AITAC_updated/AI-TAC/train_test_test
 # log file
-log: log.txt
+log: /home/katalitf/Documents/AITAC_updated/AI-TAC/train_test_test/log.txt
 

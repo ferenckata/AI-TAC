@@ -44,6 +44,7 @@ class UserInterface:
             self,
             model_name: str,
             outdir: str,
+            config_path: str,
             x_file:str,
             y_file: str,
             peak_names_file:str) -> None:
@@ -89,7 +90,7 @@ class UserInterface:
             eval_loader,
             learning_rate,
             num_epochs,
-            outdir,
+            config_path,
             device)
         print("eval fit")
         predictions, max_activations, max_act_index = tt_instance.eval(eval_loader, model,device)

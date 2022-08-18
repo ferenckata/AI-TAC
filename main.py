@@ -15,8 +15,9 @@ def train_test():
     """
     ui = UI.UserInterface()
     ui.train_main_model(
-        "test",
-        "test",
+        "train_test_test",
+        "train_test_test",
+        "config.yml",
         "sample_data/one_hot_seqs.npy",
         "sample_data/cell_type_array.npy",
         "sample_data/peak_names.npy")

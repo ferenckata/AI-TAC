@@ -61,7 +61,7 @@ class ModelUtils:
                 criterion: nn.Module,
                 optimizer: torch.optim,
                 num_epochs: int,
-                io_instance: IO) -> tuple:
+                config_path: str) -> tuple:
         """Function to train model
 
         Parameters
@@ -73,11 +73,12 @@ class ModelUtils:
         criterion: nn.Module
         optimizer: torch.optim
         num_epochs: int
-        io_instance: str
+        config_path: str
 
         Return
         ------
         """
+        io_instance = IO(config_path)
         total_step = len(train_loader)
         model.train()
 

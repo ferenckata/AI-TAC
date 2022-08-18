@@ -87,7 +87,7 @@ class TrainTestModel:
             eval_loader: DataLoader,
             learning_rate: float,
             num_epochs: int,
-            output_file_path: str,
+            config_path: str,
             device:torch.device) -> Tuple:
         """
         Function to fit the model
@@ -107,11 +107,11 @@ class TrainTestModel:
             criterion,
             optimizer,
             num_epochs,
-            output_file_path)
+            config_path)
         # save weigths ToDo: move to a different function
-        torch.save(model.state_dict(), '../models/' + model_name + '.ckpt')
+        torch.save(model.state_dict(), 'my_models/' + model_name + '.ckpt')
         #save the whole model
-        torch.save(model, '../models/' + model_name + '.pth')
+        torch.save(model, 'my_models/' + model_name + '.pth')
 
         return model, best_loss
 

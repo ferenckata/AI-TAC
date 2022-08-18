@@ -1,3 +1,5 @@
+import os
+import sys
 import numpy as np
 from numpy import random
 import pandas as pd
@@ -5,8 +7,6 @@ import pandas as pd
 from sklearn.model_selection import KFold
 import torch.utils.data
 import matplotlib
-import os
-import sys
 matplotlib.use('Agg')
 
 from src.models import aitac
